@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef } from 'react'
 
@@ -51,7 +51,7 @@ export function ConfirmModal({
   const confirmButtonClass =
     confirmVariant === 'danger'
       ? 'bg-red-600 hover:bg-red-500 disabled:bg-red-600/50'
-      : 'bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-600/50'
+      : 'bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">

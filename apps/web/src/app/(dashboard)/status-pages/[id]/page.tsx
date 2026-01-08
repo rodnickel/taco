@@ -93,7 +93,7 @@ export default function StatusPageDetailPage({ params }: { params: Promise<{ id:
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -157,7 +157,7 @@ export default function StatusPageDetailPage({ params }: { params: Promise<{ id:
             href={`/status/${statusPage.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-zinc-400 hover:text-emerald-400 transition-colors"
+            className="text-zinc-400 hover:text-orange-400 transition-colors"
           >
             /status/{statusPage.slug}
           </a>
@@ -179,7 +179,7 @@ export default function StatusPageDetailPage({ params }: { params: Promise<{ id:
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               statusPage.isPublic
                 ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-                : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                : 'bg-orange-600 text-white hover:bg-orange-500'
             }`}
           >
             {statusPage.isPublic ? 'Tornar privada' : 'Tornar pública'}
@@ -225,7 +225,7 @@ export default function StatusPageDetailPage({ params }: { params: Promise<{ id:
           <h2 className="text-lg font-semibold text-white">Monitors incluídos</h2>
           <Link
             href={`/status-pages/${statusPage.id}/edit`}
-            className="text-sm text-emerald-400 hover:text-emerald-300"
+            className="text-sm text-orange-400 hover:text-orange-300"
           >
             Gerenciar monitors
           </Link>
@@ -236,7 +236,7 @@ export default function StatusPageDetailPage({ params }: { params: Promise<{ id:
             <p className="text-zinc-400 mb-4">Nenhum monitor adicionado</p>
             <Link
               href={`/status-pages/${statusPage.id}/edit`}
-              className="text-emerald-400 hover:text-emerald-300 text-sm"
+              className="text-orange-400 hover:text-orange-300 text-sm"
             >
               Adicionar monitors
             </Link>

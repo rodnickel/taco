@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import type { DailyUptimeData } from '@/lib/api'
@@ -21,7 +21,7 @@ export function UptimeBar({ history, uptimePercentage }: UptimeBarProps) {
       case 'degraded':
         return 'bg-amber-500'
       case 'partial':
-        return 'bg-orange-500'
+        return 'bg-emerald-500'
       case 'no_data':
       default:
         return 'bg-zinc-700'
@@ -157,7 +157,7 @@ export function UptimeBar({ history, uptimePercentage }: UptimeBarProps) {
           <span>Degradado</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-orange-500" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
           <span>Parcial</span>
         </div>
         <div className="flex items-center gap-1.5">

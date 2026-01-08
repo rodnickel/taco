@@ -59,7 +59,9 @@
       "Bash(git -C \"c:\\\\Users\\\\rodol\\\\Apps\\\\Git\\\\observabilidade-it\" status)",
       "Bash(git -C \"c:\\\\Users\\\\rodol\\\\Apps\\\\Git\\\\observabilidade-it\" diff --stat)",
       "Bash(git -C \"c:\\\\Users\\\\rodol\\\\Apps\\\\Git\\\\observabilidade-it\" log --oneline -5)",
-      "Bash(git -C \"c:\\\\Users\\\\rodol\\\\Apps\\\\Git\\\\observabilidade-it\" add -A)"
+      "Bash(git -C \"c:\\\\Users\\\\rodol\\\\Apps\\\\Git\\\\observabilidade-it\" add -A)",
+      "Bash(git -C \"c:\\\\Users\\\\rodol\\\\Apps\\\\Git\\\\observabilidade-it\" commit -m \"$\\(cat <<''EOF''\nfeat: Add Teams feature with multi-tenant support and Portainer deployment\n\n- Add Teams module with RBAC \\(Admin, Editor, Viewer roles\\)\n- Implement team invites via email and shareable links\n- Migrate all resources \\(monitors, alerts, status pages\\) to team-based ownership\n- Add TeamContext and TeamSelector for frontend team switching\n- Create team management pages \\(settings, members, invites\\)\n- Add public invite acceptance flow\n- Configure docker-entrypoint.sh for auto database sync\n- Add docker-compose.portainer.yml for production deployment with Traefik\n- Add DEPLOY.md documentation for Portainer setup\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"c:\\\\Users\\\\rodol\\\\Apps\\\\Git\\\\observabilidade-it\" push)"
     ]
   }
 }

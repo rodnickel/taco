@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useRef } from 'react'
 
@@ -43,14 +43,14 @@ export function AlertModal({
 
   const iconColors = {
     error: 'text-red-400 bg-red-500/10',
-    success: 'text-emerald-400 bg-emerald-500/10',
+    success: 'text-orange-400 bg-orange-500/10',
     warning: 'text-amber-400 bg-amber-500/10',
     info: 'text-blue-400 bg-blue-500/10',
   }
 
   const buttonColors = {
     error: 'bg-red-600 hover:bg-red-500',
-    success: 'bg-emerald-600 hover:bg-emerald-500',
+    success: 'bg-orange-600 hover:bg-orange-500',
     warning: 'bg-amber-600 hover:bg-amber-500',
     info: 'bg-blue-600 hover:bg-blue-500',
   }

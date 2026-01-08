@@ -5,9 +5,9 @@ import type { PublicStatusPage, PublicSection, PublicMonitor } from '@/lib/api'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3333'
 
-function StatusBadge({ status, primaryColor }: { status: string | null; primaryColor: string }) {
+function StatusBadge({ status }: { status: string | null; primaryColor: string }) {
   const styles: Record<string, { bg: string; text: string }> = {
-    up: { bg: primaryColor + '20', text: primaryColor },
+    up: { bg: '#10b98120', text: '#10b981' },
     down: { bg: '#ef444420', text: '#ef4444' },
     degraded: { bg: '#f59e0b20', text: '#f59e0b' },
   }
@@ -39,13 +39,13 @@ function UptimeBar({ history, primaryColor }: { history: { date: string; status:
   const getBarColor = (status: string) => {
     switch (status) {
       case 'up':
-        return primaryColor
+        return '#10b981' // emerald-500 - verde classico para OK
       case 'down':
         return '#ef4444'
       case 'degraded':
         return '#f59e0b'
       case 'partial':
-        return '#f97316'
+        return '#10b981'
       case 'no_data':
       default:
         return '#3f3f46'
@@ -126,7 +126,7 @@ function MonitorCard({
             className="w-2 h-2 rounded-full"
             style={{
               backgroundColor: monitor.currentStatus === 'up'
-                ? statusPage.primaryColor
+                ? '#10b981'
                 : monitor.currentStatus === 'down'
                 ? '#ef4444'
                 : '#71717a',
@@ -218,7 +218,7 @@ export default function PublicStatusPage({ params }: { params: Promise<{ slug: s
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -290,7 +290,7 @@ export default function PublicStatusPage({ params }: { params: Promise<{ slug: s
           className="rounded-2xl p-6 mb-8 border"
           style={{
             backgroundColor: statusPage.backgroundColor,
-            borderColor: anyDown ? '#ef4444' + '40' : allUp ? statusPage.primaryColor + '40' : '#f59e0b40',
+            borderColor: anyDown ? '#ef444440' : allUp ? '#10b98140' : '#f59e0b40',
           }}
         >
           <div className="flex items-center justify-between">
@@ -298,7 +298,7 @@ export default function PublicStatusPage({ params }: { params: Promise<{ slug: s
               <div
                 className="w-4 h-4 rounded-full animate-pulse"
                 style={{
-                  backgroundColor: anyDown ? '#ef4444' : allUp ? statusPage.primaryColor : '#f59e0b',
+                  backgroundColor: anyDown ? '#ef4444' : allUp ? '#10b981' : '#f59e0b',
                 }}
               />
               <div>
@@ -351,7 +351,7 @@ export default function PublicStatusPage({ params }: { params: Promise<{ slug: s
         {/* Footer */}
         <div className="text-center mt-12 pt-8 border-t border-zinc-800">
           <p className="text-sm text-zinc-500">
-            Powered by <span style={{ color: statusPage.primaryColor }}>BeaconOps</span>
+            Powered by <span className="font-display font-semibold" style={{ color: statusPage.primaryColor }}>Taco</span>
           </p>
         </div>
       </div>

@@ -98,7 +98,7 @@ function SortableSection({
         type="text"
         value={section.name}
         onChange={(e) => onNameChange(section.id, e.target.value)}
-        className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-600 rounded text-white focus:outline-none focus:border-emerald-500"
+        className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-600 rounded text-white focus:outline-none focus:border-orange-500"
       />
 
       {/* Monitor count */}
@@ -156,7 +156,7 @@ function SortableMonitorCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-start gap-3 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30"
+      className="flex items-start gap-3 p-4 rounded-lg bg-orange-500/10 border border-orange-500/30"
     >
       {/* Drag handle */}
       <button
@@ -173,7 +173,7 @@ function SortableMonitorCard({
         type="checkbox"
         checked={true}
         onChange={() => onToggle(selection.monitorId)}
-        className="w-4 h-4 mt-1.5 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+        className="w-4 h-4 mt-1.5 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
       />
 
       <div className="flex-1 space-y-2">
@@ -187,14 +187,14 @@ function SortableMonitorCard({
             value={selection.displayName}
             onChange={(e) => onDisplayNameChange(selection.monitorId, e.target.value)}
             placeholder="Nome customizado (opcional)"
-            className="px-3 py-1.5 text-sm bg-zinc-800 border border-zinc-700 rounded text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+            className="px-3 py-1.5 text-sm bg-zinc-800 border border-zinc-700 rounded text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
           />
 
           {/* Section select */}
           <select
             value={selection.sectionId || ''}
             onChange={(e) => onSectionChange(selection.monitorId, e.target.value || null)}
-            className="px-3 py-1.5 text-sm bg-zinc-800 border border-zinc-700 rounded text-white focus:outline-none focus:border-emerald-500"
+            className="px-3 py-1.5 text-sm bg-zinc-800 border border-zinc-700 rounded text-white focus:outline-none focus:border-orange-500"
           >
             <option value="">Sem seção</option>
             {sections.map((s) => (
@@ -518,7 +518,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -596,7 +596,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
               onChange={(e) => setName(e.target.value)}
               required
               maxLength={100}
-              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
             />
           </div>
 
@@ -618,7 +618,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
                 className={`flex-1 px-4 py-2.5 bg-zinc-800 border rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-colors ${
                   slugError
                     ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-zinc-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                    : 'border-zinc-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500'
                 }`}
               />
             </div>
@@ -638,7 +638,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
               onChange={(e) => setDescription(e.target.value)}
               maxLength={500}
               rows={3}
-              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none"
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors resize-none"
             />
           </div>
 
@@ -649,7 +649,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
               type="checkbox"
               checked={isPublic}
               onChange={(e) => setIsPublic(e.target.checked)}
-              className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+              className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
             />
             <label htmlFor="isPublic" className="text-sm text-zinc-300">
               Página pública
@@ -678,7 +678,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
                   type="text"
                   value={primaryColor}
                   onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
                 />
               </div>
             </div>
@@ -699,7 +699,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
                   type="text"
                   value={backgroundColor}
                   onChange={(e) => setBackgroundColor(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
                 />
               </div>
             </div>
@@ -717,7 +717,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
                 type="checkbox"
                 checked={showUptime}
                 onChange={(e) => setShowUptime(e.target.checked)}
-                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
               />
               <label htmlFor="showUptime" className="text-sm text-zinc-300">
                 Mostrar porcentagem de uptime
@@ -730,7 +730,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
                 type="checkbox"
                 checked={showLatency}
                 onChange={(e) => setShowLatency(e.target.checked)}
-                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
               />
               <label htmlFor="showLatency" className="text-sm text-zinc-300">
                 Mostrar latência
@@ -743,7 +743,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
                 type="checkbox"
                 checked={showHistory}
                 onChange={(e) => setShowHistory(e.target.checked)}
-                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
               />
               <label htmlFor="showHistory" className="text-sm text-zinc-300">
                 Mostrar histórico de uptime
@@ -763,7 +763,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
                 onChange={(e) => setHistoryDays(Number(e.target.value))}
                 min={7}
                 max={365}
-                className="w-32 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                className="w-32 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               />
             </div>
           )}
@@ -785,7 +785,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
               value={newSectionName}
               onChange={(e) => setNewSectionName(e.target.value)}
               placeholder="Nome da nova seção"
-              className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+              className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault()
@@ -797,7 +797,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
               type="button"
               onClick={handleAddSection}
               disabled={!newSectionName.trim()}
-              className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+              className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
             >
               Adicionar
             </button>
@@ -830,8 +830,8 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
               <DragOverlay>
                 {activeSection && (
                   <DragOverlayItem>
-                    <div className="flex items-center gap-3 p-4 bg-zinc-800 rounded-lg border border-emerald-500">
-                      <DragHandleIcon className="w-5 h-5 text-emerald-400" />
+                    <div className="flex items-center gap-3 p-4 bg-zinc-800 rounded-lg border border-orange-500">
+                      <DragHandleIcon className="w-5 h-5 text-orange-400" />
                       <span className="text-white">{activeSection.name}</span>
                     </div>
                   </DragOverlayItem>
@@ -851,7 +851,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
               <p className="text-zinc-400 mb-4">Nenhum monitor encontrado</p>
               <Link
                 href="/monitors/new"
-                className="text-emerald-400 hover:text-emerald-300 text-sm"
+                className="text-orange-400 hover:text-orange-300 text-sm"
               >
                 Criar primeiro monitor
               </Link>
@@ -872,7 +872,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
                         type="checkbox"
                         checked={false}
                         onChange={() => handleMonitorToggle(monitor.id)}
-                        className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                        className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
                       />
                       <div className="flex-1">
                         <p className="text-white font-medium">{monitor.name}</p>
@@ -975,8 +975,8 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
               <DragOverlay>
                 {activeMonitor && activeMonitorSelection && (
                   <DragOverlayItem>
-                    <div className="flex items-center gap-3 p-4 bg-emerald-500/20 rounded-lg border border-emerald-500">
-                      <DragHandleIcon className="w-5 h-5 text-emerald-400" />
+                    <div className="flex items-center gap-3 p-4 bg-orange-500/20 rounded-lg border border-orange-500">
+                      <DragHandleIcon className="w-5 h-5 text-orange-400" />
                       <span className="text-white">{activeMonitor.name}</span>
                     </div>
                   </DragOverlayItem>
@@ -1003,7 +1003,7 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
           <button
             type="submit"
             disabled={loading || !!slugError}
-            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+            className="px-6 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
           >
             {loading ? (
               <>

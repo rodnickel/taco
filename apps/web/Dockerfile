@@ -10,6 +10,7 @@ RUN npm install
 
 # Copy web source code
 COPY apps/web/src ./src
+COPY apps/web/public ./public
 COPY apps/web/next.config.ts ./
 COPY apps/web/tsconfig.json ./
 COPY apps/web/tailwind.config.ts ./
@@ -32,6 +33,7 @@ ENV NODE_ENV=production
 # Copy built files
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
 

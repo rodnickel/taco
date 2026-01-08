@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -111,7 +111,7 @@ export default function AlertsPage() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function AlertsPage() {
         </div>
         <Link
           href="/alerts/new"
-          className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+          className="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -154,7 +154,7 @@ export default function AlertsPage() {
           <p className="text-zinc-400 mb-6">Configure um canal para receber alertas quando seus monitores ficarem offline.</p>
           <Link
             href="/alerts/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-lg transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -202,7 +202,7 @@ export default function AlertsPage() {
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                       channel.active
                         ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-                        : 'bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30'
+                        : 'bg-orange-600/20 text-orange-400 hover:bg-orange-600/30'
                     }`}
                   >
                     {channel.active ? 'Desativar' : 'Ativar'}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
@@ -95,7 +95,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-950">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -110,10 +110,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Logo */}
           <div className="h-16 flex items-center px-6 border-b border-zinc-800">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">B</span>
-              </div>
-              <span className="text-lg font-semibold text-white">BeaconOps</span>
+              <img src="/logo-taco.png" alt="Taco" className="h-8" />
+              <span className="text-lg font-semibold text-white font-display">Taco</span>
             </Link>
           </div>
 
@@ -132,7 +130,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-emerald-500/10 text-emerald-400'
+                      ? 'bg-orange-500/10 text-orange-400'
                       : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                   }`}
                 >

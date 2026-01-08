@@ -86,7 +86,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -136,7 +136,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
               onChange={(e) => setName(e.target.value)}
               required
               maxLength={100}
-              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
             />
           </div>
 
@@ -151,7 +151,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               required
-              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
             />
           </div>
 
@@ -165,7 +165,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
                 id="method"
                 value={method}
                 onChange={(e) => setMethod(e.target.value as 'GET' | 'POST' | 'HEAD')}
-                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               >
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
@@ -184,7 +184,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
                 onChange={(e) => setExpectedStatus(Number(e.target.value))}
                 min={100}
                 max={599}
-                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               />
             </div>
           </div>
@@ -202,7 +202,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
                 onChange={(e) => setIntervalSeconds(Number(e.target.value))}
                 min={5}
                 max={3600}
-                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               />
               <p className="text-xs text-zinc-500 mt-1">Mín: 5s, Máx: 3600s</p>
             </div>
@@ -218,7 +218,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
                 onChange={(e) => setTimeout(Number(e.target.value))}
                 min={5}
                 max={60}
-                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               />
               <p className="text-xs text-zinc-500 mt-1">Mín: 5s, Máx: 60s</p>
             </div>
@@ -232,7 +232,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
                 type="checkbox"
                 checked={checkSsl}
                 onChange={(e) => setCheckSsl(e.target.checked)}
-                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
               />
               <label htmlFor="checkSsl" className="text-sm text-zinc-300">
                 Verificar certificado SSL
@@ -245,7 +245,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
                 type="checkbox"
                 checked={active}
                 onChange={(e) => setActive(e.target.checked)}
-                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
               />
               <label htmlFor="active" className="text-sm text-zinc-300">
                 Monitor ativo
@@ -258,7 +258,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
                 type="checkbox"
                 checked={alertsEnabled}
                 onChange={(e) => setAlertsEnabled(e.target.checked)}
-                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
               />
               <label htmlFor="alertsEnabled" className="text-sm text-zinc-300">
                 Enviar alertas quando o status mudar
@@ -278,7 +278,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
           <button
             type="submit"
             disabled={saving}
-            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+            className="px-6 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
           >
             {saving ? (
               <>

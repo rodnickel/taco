@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -101,7 +101,7 @@ export default function MonitorsPage() {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -118,7 +118,7 @@ export default function MonitorsPage() {
         </div>
         <Link
           href="/monitors/new"
-          className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium rounded-lg transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -148,7 +148,7 @@ export default function MonitorsPage() {
           </p>
           <Link
             href="/monitors/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-lg transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -173,7 +173,7 @@ export default function MonitorsPage() {
                     <div className="flex items-center gap-3">
                       <Link
                         href={`/monitors/${monitor.id}`}
-                        className="text-lg font-medium text-white hover:text-emerald-400 transition-colors"
+                        className="text-lg font-medium text-white hover:text-orange-400 transition-colors"
                       >
                         {monitor.name}
                       </Link>
@@ -223,7 +223,7 @@ export default function MonitorsPage() {
                       className={`p-2 rounded-lg transition-colors ${
                         monitor.active
                           ? 'text-zinc-400 hover:text-amber-400 hover:bg-amber-500/10'
-                          : 'text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10'
+                          : 'text-zinc-400 hover:text-orange-400 hover:bg-orange-500/10'
                       }`}
                       title={monitor.active ? 'Pausar' : 'Ativar'}
                     >

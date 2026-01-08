@@ -1,0 +1,11 @@
+<svg viewBox="0 0 140 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Ultra minimal - just the T as a taco shape -->
+  <g transform="translate(4, 4)">
+    <!-- T that looks like a taco -->
+    <path d="M4 8H28M16 8V28" stroke="#F97316" stroke-width="6" stroke-linecap="round"/>
+    <!-- Small taco on the T -->
+    <path d="M8 6C8 6 10 2 16 2C22 2 24 6 24 6" stroke="#F97316" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </g>
+  <!-- Text "aco" completing "Taco" -->
+  <text x="38" y="28" font-family="system-ui, -apple-system, sans-serif" font-size="26" font-weight="700" fill="#F97316">aco</text>
+</svg>

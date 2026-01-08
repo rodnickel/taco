@@ -100,7 +100,7 @@ export default function TeamMembersPage() {
     return (
       <div className="p-8 flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -148,7 +148,7 @@ export default function TeamMembersPage() {
         </Link>
         <Link
           href={`/teams/${teamId}/members`}
-          className="pb-3 px-1 text-sm font-medium text-emerald-400 border-b-2 border-emerald-400"
+          className="pb-3 px-1 text-sm font-medium text-orange-400 border-b-2 border-orange-400"
         >
           Membros
         </Link>
@@ -169,7 +169,7 @@ export default function TeamMembersPage() {
         </div>
       )}
       {success && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg text-sm mb-6">
+        <div className="bg-orange-500/10 border border-orange-500/20 text-orange-400 px-4 py-3 rounded-lg text-sm mb-6">
           {success}
         </div>
       )}
@@ -217,7 +217,7 @@ export default function TeamMembersPage() {
                       value={member.role}
                       onChange={(e) => handleRoleChange(member.user.id, e.target.value as TeamRole)}
                       disabled={updatingRole === member.user.id}
-                      className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                      className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white focus:outline-none focus:border-orange-500 disabled:opacity-50"
                     >
                       <option value="ADMIN">{roleLabels.ADMIN}</option>
                       <option value="EDITOR">{roleLabels.EDITOR}</option>
@@ -254,7 +254,7 @@ export default function TeamMembersPage() {
         <div className="mt-6">
           <Link
             href={`/teams/${teamId}/invites`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-lg transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z" />

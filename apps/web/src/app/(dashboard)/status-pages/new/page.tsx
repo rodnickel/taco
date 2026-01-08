@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -175,7 +175,7 @@ export default function NewStatusPagePage() {
               onChange={(e) => setName(e.target.value)}
               required
               maxLength={100}
-              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               placeholder="Status do Meu Serviço"
             />
           </div>
@@ -198,7 +198,7 @@ export default function NewStatusPagePage() {
                 className={`flex-1 px-4 py-2.5 bg-zinc-800 border rounded-lg text-white placeholder-zinc-500 focus:outline-none transition-colors ${
                   slugError
                     ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                    : 'border-zinc-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                    : 'border-zinc-700 focus:border-orange-500 focus:ring-1 focus:ring-orange-500'
                 }`}
                 placeholder="meu-servico"
               />
@@ -222,7 +222,7 @@ export default function NewStatusPagePage() {
               onChange={(e) => setDescription(e.target.value)}
               maxLength={500}
               rows={3}
-              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none"
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors resize-none"
               placeholder="Uma breve descrição da sua página de status"
             />
           </div>
@@ -234,7 +234,7 @@ export default function NewStatusPagePage() {
               type="checkbox"
               checked={isPublic}
               onChange={(e) => setIsPublic(e.target.checked)}
-              className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+              className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
             />
             <label htmlFor="isPublic" className="text-sm text-zinc-300">
               Página pública (visível sem autenticação)
@@ -264,7 +264,7 @@ export default function NewStatusPagePage() {
                   type="text"
                   value={primaryColor}
                   onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
                 />
               </div>
             </div>
@@ -286,7 +286,7 @@ export default function NewStatusPagePage() {
                   type="text"
                   value={backgroundColor}
                   onChange={(e) => setBackgroundColor(e.target.value)}
-                  className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
                 />
               </div>
             </div>
@@ -304,7 +304,7 @@ export default function NewStatusPagePage() {
                 type="checkbox"
                 checked={showUptime}
                 onChange={(e) => setShowUptime(e.target.checked)}
-                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
               />
               <label htmlFor="showUptime" className="text-sm text-zinc-300">
                 Mostrar porcentagem de uptime
@@ -317,7 +317,7 @@ export default function NewStatusPagePage() {
                 type="checkbox"
                 checked={showLatency}
                 onChange={(e) => setShowLatency(e.target.checked)}
-                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
               />
               <label htmlFor="showLatency" className="text-sm text-zinc-300">
                 Mostrar latência
@@ -330,7 +330,7 @@ export default function NewStatusPagePage() {
                 type="checkbox"
                 checked={showHistory}
                 onChange={(e) => setShowHistory(e.target.checked)}
-                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
               />
               <label htmlFor="showHistory" className="text-sm text-zinc-300">
                 Mostrar histórico de uptime
@@ -350,7 +350,7 @@ export default function NewStatusPagePage() {
                 onChange={(e) => setHistoryDays(Number(e.target.value))}
                 min={7}
                 max={365}
-                className="w-32 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                className="w-32 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               />
               <p className="text-xs text-zinc-500 mt-1">Entre 7 e 365 dias</p>
             </div>
@@ -364,14 +364,14 @@ export default function NewStatusPagePage() {
 
           {loadingMonitors ? (
             <div className="flex items-center justify-center py-8">
-              <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : monitors.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-zinc-400 mb-4">Nenhum monitor encontrado</p>
               <Link
                 href="/monitors/new"
-                className="text-emerald-400 hover:text-emerald-300 text-sm"
+                className="text-orange-400 hover:text-orange-300 text-sm"
               >
                 Criar primeiro monitor
               </Link>
@@ -383,7 +383,7 @@ export default function NewStatusPagePage() {
                   key={monitor.id}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                     selectedMonitors.includes(monitor.id)
-                      ? 'bg-emerald-500/10 border border-emerald-500/30'
+                      ? 'bg-orange-500/10 border border-orange-500/30'
                       : 'bg-zinc-800 border border-transparent hover:border-zinc-700'
                   }`}
                 >
@@ -391,7 +391,7 @@ export default function NewStatusPagePage() {
                     type="checkbox"
                     checked={selectedMonitors.includes(monitor.id)}
                     onChange={() => handleMonitorToggle(monitor.id)}
-                    className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-emerald-500 focus:ring-emerald-500 focus:ring-offset-zinc-900"
+                    className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
                   />
                   <div className="flex-1">
                     <p className="text-white font-medium">{monitor.name}</p>
@@ -400,7 +400,7 @@ export default function NewStatusPagePage() {
                   <span
                     className={`w-2 h-2 rounded-full ${
                       monitor.currentStatus === 'up'
-                        ? 'bg-emerald-500'
+                        ? 'bg-orange-500'
                         : monitor.currentStatus === 'down'
                         ? 'bg-red-500'
                         : 'bg-zinc-500'
@@ -429,7 +429,7 @@ export default function NewStatusPagePage() {
           <button
             type="submit"
             disabled={loading || !!slugError}
-            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+            className="px-6 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
           >
             {loading ? (
               <>

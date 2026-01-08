@@ -77,7 +77,7 @@ export default function AcceptInvitePage() {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -118,10 +118,8 @@ export default function AcceptInvitePage() {
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">B</span>
-            </div>
-            <span className="text-xl font-semibold text-white">BeaconOps</span>
+            <img src="/logo-taco.png" alt="Taco" className="h-10" />
+            <span className="text-xl font-semibold text-white font-display">Taco</span>
           </Link>
         </div>
 
@@ -177,7 +175,7 @@ export default function AcceptInvitePage() {
             <button
               onClick={handleAccept}
               disabled={accepting}
-              className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="w-full px-4 py-3 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               {accepting ? (
                 <>
@@ -196,7 +194,7 @@ export default function AcceptInvitePage() {
                 Nao tem uma conta?{' '}
                 <Link
                   href={`/register?invite=${token}`}
-                  className="text-emerald-400 hover:text-emerald-300"
+                  className="text-orange-400 hover:text-orange-300"
                 >
                   Criar conta
                 </Link>

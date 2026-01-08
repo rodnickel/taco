@@ -1,13 +1,14 @@
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8">
+    <main className="min-h-screen flex flex-col items-center justify-center p-8 bg-zinc-950">
       <div className="text-center space-y-6">
         {/* Logo / Título */}
-        <h1 className="text-4xl font-bold tracking-tight">
-          BeaconOps
+        <img src="/logo-taco.png" alt="Taco" className="h-16 mx-auto" />
+        <h1 className="text-4xl font-bold tracking-tight text-white font-display">
+          Taco
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md">
-          Plataforma de monitoramento e observabilidade para seus serviços
+        <p className="text-lg text-zinc-400 max-w-md">
+          Plataforma de monitoramento e observabilidade para seus servicos
         </p>
 
         {/* Status indicators demo */}
@@ -27,7 +28,7 @@ export default function Home() {
         <div className="mt-8">
           <a
             href="/login"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="bg-orange-600 hover:bg-orange-500 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             Entrar
           </a>

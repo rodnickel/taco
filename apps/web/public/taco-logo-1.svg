@@ -1,0 +1,15 @@
+<svg viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Taco icon -->
+  <g transform="translate(0, 4)">
+    <!-- Shell (outer) -->
+    <path d="M8 24C8 24 10 8 24 8C38 8 40 24 40 24" stroke="#E07D38" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <!-- Filling - lettuce -->
+    <ellipse cx="24" cy="16" rx="10" ry="4" fill="#7CB342"/>
+    <!-- Filling - meat -->
+    <ellipse cx="24" cy="14" rx="8" ry="3" fill="#8D5524"/>
+    <!-- Filling - cheese -->
+    <ellipse cx="24" cy="12" rx="6" ry="2" fill="#FFC107"/>
+  </g>
+  <!-- Text "Taco" -->
+  <text x="52" y="28" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="700" fill="#E07D38">Taco</text>
+</svg>

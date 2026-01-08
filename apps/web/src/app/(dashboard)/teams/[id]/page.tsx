@@ -93,7 +93,7 @@ export default function TeamSettingsPage() {
     return (
       <div className="p-8 flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function TeamSettingsPage() {
       <div className="flex gap-4 mb-8 border-b border-zinc-800">
         <Link
           href={`/teams/${teamId}`}
-          className="pb-3 px-1 text-sm font-medium text-emerald-400 border-b-2 border-emerald-400"
+          className="pb-3 px-1 text-sm font-medium text-orange-400 border-b-2 border-orange-400"
         >
           Geral
         </Link>
@@ -162,7 +162,7 @@ export default function TeamSettingsPage() {
         </div>
       )}
       {success && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg text-sm mb-6">
+        <div className="bg-orange-500/10 border border-orange-500/20 text-orange-400 px-4 py-3 rounded-lg text-sm mb-6">
           {success}
         </div>
       )}
@@ -183,7 +183,7 @@ export default function TeamSettingsPage() {
               required
               maxLength={50}
               disabled={!canAdmin}
-              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -201,7 +201,7 @@ export default function TeamSettingsPage() {
               maxLength={30}
               pattern="[a-z0-9-]+"
               disabled={!canAdmin}
-              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -237,7 +237,7 @@ export default function TeamSettingsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+              className="px-6 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
             >
               {saving ? (
                 <>

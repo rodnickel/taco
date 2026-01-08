@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
@@ -91,7 +91,7 @@ export default function TeamSelector() {
       <div className="px-3 py-2">
         <Link
           href="/teams/new"
-          className="flex items-center gap-2 px-3 py-2.5 bg-emerald-500/10 text-emerald-400 rounded-lg text-sm font-medium hover:bg-emerald-500/20 transition-colors"
+          className="flex items-center gap-2 px-3 py-2.5 bg-orange-500/10 text-orange-400 rounded-lg text-sm font-medium hover:bg-orange-500/20 transition-colors"
         >
           <PlusIcon className="w-4 h-4" />
           Criar Time
@@ -155,7 +155,7 @@ export default function TeamSelector() {
                   <p className="text-xs text-zinc-500">{team._count?.monitors || 0} monitors</p>
                 </div>
                 {team.id === currentTeam?.id && (
-                  <CheckIcon className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                  <CheckIcon className="w-5 h-5 text-orange-400 flex-shrink-0" />
                 )}
               </button>
             ))}

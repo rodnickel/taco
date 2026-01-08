@@ -35,7 +35,7 @@ body {
 
 /* Focus rings */
 *:focus-visible {
-  outline: 2px solid #10b981;
+  outline: 2px solid #f97316;
   outline-offset: 2px;
 }
 
@@ -44,7 +44,7 @@ input, select, textarea {
   color: inherit;
 }
 
-/* Status badges */
+/* Status badges - cores classicas de status */
 @layer utilities {
   .badge-up {
     @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20;

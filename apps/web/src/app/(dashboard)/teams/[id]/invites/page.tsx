@@ -117,7 +117,7 @@ export default function TeamInvitesPage() {
     return (
       <div className="p-8 flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -180,7 +180,7 @@ export default function TeamInvitesPage() {
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-lg transition-colors"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -206,7 +206,7 @@ export default function TeamInvitesPage() {
         </Link>
         <Link
           href={`/teams/${teamId}/invites`}
-          className="pb-3 px-1 text-sm font-medium text-emerald-400 border-b-2 border-emerald-400"
+          className="pb-3 px-1 text-sm font-medium text-orange-400 border-b-2 border-orange-400"
         >
           Convites
         </Link>
@@ -219,7 +219,7 @@ export default function TeamInvitesPage() {
         </div>
       )}
       {success && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-lg text-sm mb-6">
+        <div className="bg-orange-500/10 border border-orange-500/20 text-orange-400 px-4 py-3 rounded-lg text-sm mb-6">
           {success}
         </div>
       )}
@@ -236,11 +236,11 @@ export default function TeamInvitesPage() {
               onClick={() => setInviteType('link')}
               className={`flex-1 p-4 rounded-lg border text-left transition-colors ${
                 inviteType === 'link'
-                  ? 'border-emerald-500 bg-emerald-500/10'
+                  ? 'border-orange-500 bg-orange-500/10'
                   : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
               }`}
             >
-              <p className={`font-medium ${inviteType === 'link' ? 'text-emerald-400' : 'text-white'}`}>
+              <p className={`font-medium ${inviteType === 'link' ? 'text-orange-400' : 'text-white'}`}>
                 Link de convite
               </p>
               <p className="text-xs text-zinc-500 mt-1">Qualquer pessoa com o link pode entrar</p>
@@ -250,11 +250,11 @@ export default function TeamInvitesPage() {
               onClick={() => setInviteType('email')}
               className={`flex-1 p-4 rounded-lg border text-left transition-colors ${
                 inviteType === 'email'
-                  ? 'border-emerald-500 bg-emerald-500/10'
+                  ? 'border-orange-500 bg-orange-500/10'
                   : 'border-zinc-700 bg-zinc-800/50 hover:border-zinc-600'
               }`}
             >
-              <p className={`font-medium ${inviteType === 'email' ? 'text-emerald-400' : 'text-white'}`}>
+              <p className={`font-medium ${inviteType === 'email' ? 'text-orange-400' : 'text-white'}`}>
                 Convite por email
               </p>
               <p className="text-xs text-zinc-500 mt-1">Apenas o email especificado pode aceitar</p>
@@ -272,7 +272,7 @@ export default function TeamInvitesPage() {
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
                 placeholder="email@exemplo.com"
               />
             </div>
@@ -289,7 +289,7 @@ export default function TeamInvitesPage() {
                 value={inviteMaxUses}
                 onChange={(e) => setInviteMaxUses(Number(e.target.value))}
                 min={0}
-                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               />
               <p className="text-xs text-zinc-500 mt-1">0 = ilimitado</p>
             </div>
@@ -303,7 +303,7 @@ export default function TeamInvitesPage() {
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value as TeamRole)}
-              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
             >
               <option value="VIEWER">Visualizador - Apenas visualizacao</option>
               <option value="EDITOR">Editor - Cria e edita recursos</option>
@@ -323,7 +323,7 @@ export default function TeamInvitesPage() {
             <button
               type="submit"
               disabled={creating || (inviteType === 'email' && !inviteEmail)}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+              className="px-6 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
             >
               {creating ? (
                 <>

@@ -103,7 +103,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
           <span className="text-zinc-400">Carregando...</span>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
             href={monitor.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-zinc-400 hover:text-emerald-400 transition-colors"
+            className="text-zinc-400 hover:text-orange-400 transition-colors"
           >
             {monitor.url}
           </a>
@@ -169,7 +169,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               monitor.active
                 ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
-                : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                : 'bg-orange-600 text-white hover:bg-orange-500'
             }`}
           >
             {monitor.active ? 'Pausar' : 'Ativar'}
@@ -249,7 +249,7 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           </div>
           <div>
             <p className="text-zinc-500 text-sm">Alertas</p>
-            <p className={`font-medium mt-1 ${monitor.alertsEnabled ? 'text-emerald-400' : 'text-zinc-500'}`}>
+            <p className={`font-medium mt-1 ${monitor.alertsEnabled ? 'text-orange-400' : 'text-zinc-500'}`}>
               {monitor.alertsEnabled ? 'Ativados' : 'Desativados'}
             </p>
           </div>
