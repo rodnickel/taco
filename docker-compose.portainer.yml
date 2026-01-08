@@ -1,14 +1,13 @@
 # ============================================
-# BeaconOps - Stack para Portainer + Traefik
+# Taco - Stack para Portainer + Traefik
 # ============================================
 #
 # ANTES DE FAZER DEPLOY:
-# 1. Substitua ${DOMAIN} pelo seu subdominio (ex: beaconops.seudominio.com.br)
-# 2. Configure as variaveis de ambiente no Portainer
-# 3. Certifique-se que o Traefik está rodando na rede 'traefik' ou 'proxy'
+# 1. Configure as variaveis de ambiente no Portainer
+# 2. Certifique-se que o Traefik esta rodando na rede 'traefik'
 #
 # Variaveis obrigatorias:
-#   - DOMAIN: seu subdominio
+#   - DOMAIN: seu subdominio (ex: taco.seudominio.com.br)
 #   - JWT_SECRET: chave secreta para JWT (gere com: openssl rand -hex 32)
 #   - POSTGRES_PASSWORD: senha do banco de dados
 #
@@ -20,16 +19,16 @@ services:
   # ----------------------------------------
   postgres:
     image: postgres:16-alpine
-    container_name: beaconops-postgres
+    container_name: taco-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: beaconops
+      POSTGRES_USER: taco
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: beaconops
+      POSTGRES_DB: taco
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U beaconops -d beaconops"]
+      test: ["CMD-SHELL", "pg_isready -U taco -d taco"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,7 +40,7 @@ services:
   # ----------------------------------------
   redis:
     image: redis:7-alpine
-    container_name: beaconops-redis
+    container_name: taco-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
@@ -58,15 +57,14 @@ services:
   # API - Backend Fastify
   # ----------------------------------------
   api:
-    image: ghcr.io/${GITHUB_USER:-beaconops}/beaconops-api:latest
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    container_name: beaconops-api
+    container_name: taco-api
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://beaconops:${POSTGRES_PASSWORD}@postgres:5432/beaconops
+      DATABASE_URL: postgresql://taco:${POSTGRES_PASSWORD}@postgres:5432/taco
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
       PORT: 3333
@@ -83,12 +81,13 @@ services:
       start_period: 40s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.beaconops-api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.beaconops-api.entrypoints=websecure"
-      - "traefik.http.routers.beaconops-api.tls.certresolver=letsencrypt"
-      - "traefik.http.services.beaconops-api.loadbalancer.server.port=3333"
-      - "traefik.http.middlewares.beaconops-api-strip.stripprefix.prefixes=/api"
-      - "traefik.http.routers.beaconops-api.middlewares=beaconops-api-strip"
+      - "traefik.http.routers.taco-api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.taco-api.entrypoints=websecure"
+      - "traefik.http.routers.taco-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.taco-api.loadbalancer.server.port=3333"
+      - "traefik.http.middlewares.taco-api-strip.stripprefix.prefixes=/api"
+      - "traefik.http.routers.taco-api.middlewares=taco-api-strip"
+      - "traefik.http.routers.taco-api.priority=2"
     networks:
       - internal
       - traefik
@@ -97,18 +96,16 @@ services:
   # Worker - Processamento de filas
   # ----------------------------------------
   worker:
-    image: ghcr.io/${GITHUB_USER:-beaconops}/beaconops-api:latest
     build:
       context: .
       dockerfile: apps/api/Dockerfile
-    container_name: beaconops-worker
+    container_name: taco-worker
     restart: unless-stopped
-    # Sobrescreve entrypoint para nao rodar migrations (API ja roda)
     entrypoint: ["node"]
     command: ["dist/worker.js"]
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://beaconops:${POSTGRES_PASSWORD}@postgres:5432/beaconops
+      DATABASE_URL: postgresql://taco:${POSTGRES_PASSWORD}@postgres:5432/taco
       REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
@@ -124,26 +121,24 @@ services:
   # Web - Frontend Next.js
   # ----------------------------------------
   web:
-    image: ghcr.io/${GITHUB_USER:-beaconops}/beaconops-web:latest
     build:
       context: .
       dockerfile: apps/web/Dockerfile
-    container_name: beaconops-web
+      args:
+        NEXT_PUBLIC_API_URL: https://${DOMAIN}/api
+    container_name: taco-web
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: https://${DOMAIN}/api
     depends_on:
       - api
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.beaconops-web.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.beaconops-web.entrypoints=websecure"
-      - "traefik.http.routers.beaconops-web.tls.certresolver=letsencrypt"
-      - "traefik.http.services.beaconops-web.loadbalancer.server.port=3000"
-      # Prioridade menor que a API para que /api seja roteado corretamente
-      - "traefik.http.routers.beaconops-web.priority=1"
-      - "traefik.http.routers.beaconops-api.priority=2"
+      - "traefik.http.routers.taco-web.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.taco-web.entrypoints=websecure"
+      - "traefik.http.routers.taco-web.tls.certresolver=letsencrypt"
+      - "traefik.http.services.taco-web.loadbalancer.server.port=3000"
+      - "traefik.http.routers.taco-web.priority=1"
     networks:
       - internal
       - traefik
