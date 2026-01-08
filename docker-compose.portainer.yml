@@ -1,136 +1,100 @@
 # ============================================
-# Taco - Stack para Portainer + Traefik
+# Taco - Stack para Portainer + Traefik (Swarm)
 # ============================================
 #
-# ANTES DE FAZER DEPLOY:
-# 1. Configure as variaveis de ambiente no Portainer
-# 2. Certifique-se que o Traefik esta rodando na rede 'traefik'
-#
-# Variaveis obrigatorias:
-#   - DOMAIN: seu subdominio (ex: taco.seudominio.com.br)
-#   - JWT_SECRET: chave secreta para JWT (gere com: openssl rand -hex 32)
+# Variaveis obrigatorias no Portainer:
+#   - DOMAIN: seu subdominio (ex: taco.italo.br)
+#   - JWT_SECRET: chave secreta para JWT
 #   - POSTGRES_PASSWORD: senha do banco de dados
 #
 # ============================================
 
 services:
-  # ----------------------------------------
-  # PostgreSQL - Banco de dados
-  # ----------------------------------------
   postgres:
     image: postgres:16-alpine
-    container_name: taco-postgres
-    restart: unless-stopped
     environment:
       POSTGRES_USER: taco
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: taco
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U taco -d taco"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # ----------------------------------------
-  # Redis - Cache e filas
-  # ----------------------------------------
   redis:
     image: redis:7-alpine
-    container_name: taco-redis
-    restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # ----------------------------------------
-  # API - Backend Fastify
-  # ----------------------------------------
   api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
-    container_name: taco-api
-    restart: unless-stopped
+    image: ghcr.io/rodnickel/taco-api:latest
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://taco:${POSTGRES_PASSWORD}@postgres:5432/taco
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
       PORT: 3333
-    depends_on:
-      - postgres
-      - redis
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.taco-api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
-      - "traefik.http.routers.taco-api.entrypoints=websecure"
-      - "traefik.http.routers.taco-api.tls.certresolver=letsencrypt"
-      - "traefik.http.services.taco-api.loadbalancer.server.port=3333"
-      - "traefik.http.middlewares.taco-api-strip.stripprefix.prefixes=/api"
-      - "traefik.http.routers.taco-api.middlewares=taco-api-strip"
-      - "traefik.http.routers.taco-api.priority=2"
     networks:
       - internal
       - traefik
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.taco-api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+        - "traefik.http.routers.taco-api.entrypoints=websecure"
+        - "traefik.http.routers.taco-api.tls.certresolver=letsencrypt"
+        - "traefik.http.services.taco-api.loadbalancer.server.port=3333"
+        - "traefik.http.middlewares.taco-api-strip.stripprefix.prefixes=/api"
+        - "traefik.http.routers.taco-api.middlewares=taco-api-strip"
+        - "traefik.http.routers.taco-api.priority=2"
 
-  # ----------------------------------------
-  # Worker - Processamento de filas
-  # ----------------------------------------
   worker:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
-    container_name: taco-worker
-    restart: unless-stopped
+    image: ghcr.io/rodnickel/taco-api:latest
     entrypoint: ["node"]
     command: ["dist/worker.js"]
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://taco:${POSTGRES_PASSWORD}@postgres:5432/taco
       REDIS_URL: redis://redis:6379
-    depends_on:
-      - postgres
-      - redis
-      - api
     networks:
       - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
 
-  # ----------------------------------------
-  # Web - Frontend Next.js
-  # ----------------------------------------
   web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: https://${DOMAIN}/api
-    container_name: taco-web
-    restart: unless-stopped
+    image: ghcr.io/rodnickel/taco-web:latest
     environment:
       NODE_ENV: production
-    depends_on:
-      - api
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.taco-web.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.taco-web.entrypoints=websecure"
-      - "traefik.http.routers.taco-web.tls.certresolver=letsencrypt"
-      - "traefik.http.services.taco-web.loadbalancer.server.port=3000"
-      - "traefik.http.routers.taco-web.priority=1"
     networks:
       - internal
       - traefik
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.taco-web.rule=Host(`${DOMAIN}`)"
+        - "traefik.http.routers.taco-web.entrypoints=websecure"
+        - "traefik.http.routers.taco-web.tls.certresolver=letsencrypt"
+        - "traefik.http.services.taco-web.loadbalancer.server.port=3000"
+        - "traefik.http.routers.taco-web.priority=1"
 
 volumes:
   postgres_data:
@@ -138,6 +102,6 @@ volumes:
 
 networks:
   internal:
-    driver: bridge
+    driver: overlay
   traefik:
     external: true
