@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as api from '@/lib/api'
 import type { Monitor } from '@/lib/api'
+import { useTeam } from '@/contexts/TeamContext'
 
 function StatusDot({ status }: { status: Monitor['currentStatus'] }) {
   const colors = {
@@ -43,16 +44,23 @@ function StatusBadge({ status }: { status: Monitor['currentStatus'] }) {
 
 export default function DashboardPage() {
   const router = useRouter()
+  const { currentTeam, loading: teamLoading } = useTeam()
   const [monitors, setMonitors] = useState<Monitor[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Aguarda o TeamContext terminar de carregar e ter um team selecionado
+    if (teamLoading || !currentTeam) {
+      return
+    }
+
     async function loadData() {
       try {
         const monitorsResponse = await api.getMonitors({ limit: 10 })
         setMonitors(monitorsResponse.monitors)
       } catch {
         localStorage.removeItem('token')
+        localStorage.removeItem('currentTeamId')
         router.push('/login')
       } finally {
         setLoading(false)
@@ -60,7 +68,7 @@ export default function DashboardPage() {
     }
 
     loadData()
-  }, [router])
+  }, [router, teamLoading, currentTeam])
 
   const stats = {
     total: monitors.length,
@@ -72,7 +80,7 @@ export default function DashboardPage() {
         : 100,
   }
 
-  if (loading) {
+  if (teamLoading || loading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="flex items-center gap-3">

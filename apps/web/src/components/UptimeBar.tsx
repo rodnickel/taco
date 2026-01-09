@@ -20,8 +20,6 @@ export function UptimeBar({ history, uptimePercentage }: UptimeBarProps) {
         return 'bg-red-500'
       case 'degraded':
         return 'bg-amber-500'
-      case 'partial':
-        return 'bg-emerald-500'
       case 'no_data':
       default:
         return 'bg-zinc-700'
@@ -35,9 +33,7 @@ export function UptimeBar({ history, uptimePercentage }: UptimeBarProps) {
       case 'down':
         return 'Fora do ar'
       case 'degraded':
-        return 'Degradado'
-      case 'partial':
-        return 'Parcialmente operacional'
+        return 'Teve interrupções'
       case 'no_data':
       default:
         return 'Sem dados'
@@ -154,11 +150,7 @@ export function UptimeBar({ history, uptimePercentage }: UptimeBarProps) {
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
-          <span>Degradado</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
-          <span>Parcial</span>
+          <span>Interrupções</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-red-500" />

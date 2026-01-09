@@ -239,7 +239,7 @@ export interface DailyUptimeData {
   downChecks: number
   avgLatency: number | null
   uptimePercentage: number
-  status: 'up' | 'down' | 'degraded' | 'partial' | 'no_data'
+  status: 'up' | 'down' | 'degraded' | 'no_data'
 }
 
 export async function getMonitorHistory(
@@ -321,10 +321,9 @@ export async function getMonitorHistory(
         status = 'up'
       } else if (uptimePercentage === 0) {
         status = 'down'
-      } else if (uptimePercentage >= 99) {
-        status = 'degraded'
       } else {
-        status = 'partial'
+        // Teve interrupções mas não ficou totalmente fora
+        status = 'degraded'
       }
     }
 

@@ -70,7 +70,28 @@ export const updateStatusPageLayoutSchema = z.object({
   })),
 })
 
+// Schema para grupo na status page
+export const statusPageGroupSchema = z.object({
+  groupId: z.string(),
+  displayName: z.string().optional().nullable(),
+  displayOrder: z.number().int().min(0).default(0),
+  isExpanded: z.boolean().default(true),
+})
+
+// Schema para atualizar grupos da status page
+export const updateStatusPageGroupsSchema = z.object({
+  groups: z.array(statusPageGroupSchema),
+})
+
+// Schema para query de incidentes públicos
+export const publicIncidentsQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0),
+  status: z.enum(['all', 'ongoing', 'resolved']).default('all'),
+})
+
 // Tipos inferidos
+export type PublicIncidentsQuery = z.infer<typeof publicIncidentsQuerySchema>
 export type CreateStatusPageInput = z.infer<typeof createStatusPageSchema>
 export type UpdateStatusPageInput = z.infer<typeof updateStatusPageSchema>
 export type StatusPageIdParams = z.infer<typeof statusPageIdSchema>
@@ -78,6 +99,8 @@ export type StatusPageSlugParams = z.infer<typeof statusPageSlugSchema>
 export type UpdateStatusPageMonitorsInput = z.infer<typeof updateStatusPageMonitorsSchema>
 export type UpdateStatusPageLayoutInput = z.infer<typeof updateStatusPageLayoutSchema>
 export type SectionInput = z.infer<typeof sectionSchema>
+export type StatusPageGroupInput = z.infer<typeof statusPageGroupSchema>
+export type UpdateStatusPageGroupsInput = z.infer<typeof updateStatusPageGroupsSchema>
 
 // Tipo de seção
 export interface StatusPageSectionData {
@@ -144,6 +167,20 @@ export interface PublicSection {
   monitors: PublicMonitor[]
 }
 
+// Grupo público com monitors e status agregado
+export interface PublicGroup {
+  id: string
+  name: string
+  description: string | null
+  displayOrder: number
+  isExpanded: boolean
+  status: 'up' | 'down' | 'partial' | 'degraded' | 'unknown'
+  monitorsUp: number
+  monitorsDown: number
+  monitorsTotal: number
+  monitors: PublicMonitor[]
+}
+
 // Tipo para a página pública (sem dados sensíveis)
 export interface PublicStatusPage {
   slug: string
@@ -159,4 +196,5 @@ export interface PublicStatusPage {
   historyDays: number
   sections: PublicSection[]
   monitors: PublicMonitor[] // Monitors sem seção
+  groups: PublicGroup[] // Grupos de monitores
 }

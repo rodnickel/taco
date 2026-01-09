@@ -15,6 +15,8 @@ interface DashboardLayoutProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Monitors', href: '/monitors', icon: MonitorIcon },
+  { name: 'Grupos', href: '/groups', icon: GroupIcon },
+  { name: 'Incidentes', href: '/incidents', icon: IncidentIcon },
   { name: 'Status Pages', href: '/status-pages', icon: GlobeIcon },
   { name: 'Alertas', href: '/alerts', icon: BellIcon },
 ]
@@ -51,6 +53,22 @@ function GlobeIcon({ className }: { className?: string }) {
   )
 }
 
+function IncidentIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+    </svg>
+  )
+}
+
+function GroupIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z" />
+    </svg>
+  )
+}
+
 function LogoutIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -72,6 +90,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         setUser(user)
       } catch {
         localStorage.removeItem('token')
+        localStorage.removeItem('currentTeamId')
         router.push('/login')
       } finally {
         setLoading(false)
@@ -88,6 +107,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       // Ignora erro
     }
     localStorage.removeItem('token')
+    localStorage.removeItem('currentTeamId')
     router.push('/login')
   }
 

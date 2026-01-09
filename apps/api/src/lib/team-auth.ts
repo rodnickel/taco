@@ -192,3 +192,19 @@ export async function verifyTeamMembership(
 
   return { valid: true, role: userRole }
 }
+
+// ============================================
+// Middleware helpers para uso em rotas
+// ============================================
+
+/**
+ * Middleware que requer acesso ao time (qualquer role)
+ */
+export const requireTeamAccess = createTeamAuthHook('VIEWER')
+
+/**
+ * Factory para criar middleware que requer uma role específica
+ */
+export function requireTeamRole(role: TeamRole) {
+  return createTeamAuthHook(role)
+}

@@ -8,8 +8,12 @@ import { registerTeamAuthDecorator } from './lib/team-auth.js'
 import { authRoutes } from './modules/auth/auth.routes.js'
 import { monitorsRoutes } from './modules/monitors/monitors.routes.js'
 import { alertsRoutes } from './modules/alerts/alerts.routes.js'
+import { escalationRoutes } from './modules/alerts/escalation.routes.js'
 import { statusPagesRoutes, publicStatusPageRoutes } from './modules/status-pages/status-pages.routes.js'
 import { teamsRoutes, invitesRoutes } from './modules/teams/teams.routes.js'
+import { incidentsRoutes } from './modules/incidents/incidents.routes.js'
+import { groupsRoutes } from './modules/groups/groups.routes.js'
+import { maintenanceRoutes } from './modules/maintenance/maintenance.routes.js'
 
 // Cria a instância do Fastify com logger habilitado
 const app = Fastify({
@@ -76,6 +80,9 @@ async function registerRoutes() {
   // Rotas de alerts: /alerts/*
   await app.register(alertsRoutes, { prefix: '/alerts' })
 
+  // Rotas de políticas de escalonamento
+  await app.register(escalationRoutes)
+
   // Rotas de status pages (autenticadas): /status-pages/*
   await app.register(statusPagesRoutes, { prefix: '/status-pages' })
 
@@ -87,6 +94,15 @@ async function registerRoutes() {
 
   // Rotas públicas de convites: /invites/*
   await app.register(invitesRoutes, { prefix: '/invites' })
+
+  // Rotas de incidentes: /incidents/*
+  await app.register(incidentsRoutes, { prefix: '/incidents' })
+
+  // Rotas de grupos: /groups/*
+  await app.register(groupsRoutes, { prefix: '/groups' })
+
+  // Rotas de manutenção: /maintenance/*
+  await app.register(maintenanceRoutes, { prefix: '/maintenance' })
 }
 
 // Rota de health check

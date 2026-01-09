@@ -5,6 +5,14 @@ import {
   monitorCheckWorker,
   scheduleAllMonitorChecks,
 } from './workers/monitor-check.worker.js'
+import {
+  escalationWorker,
+  startEscalationProcessor,
+} from './workers/escalation.worker.js'
+import {
+  sslCheckWorker,
+  startSSLCheckProcessor,
+} from './workers/ssl-check.worker.js'
 
 // ============================================
 // Script para executar o Worker de forma independente
@@ -30,7 +38,13 @@ async function start() {
     // Agenda verificações de todos os monitores ativos
     await scheduleAllMonitorChecks()
 
-    console.log('✅ Worker rodando e aguardando jobs...')
+    // Inicia processador de escalonamento
+    await startEscalationProcessor()
+
+    // Inicia verificador de SSL
+    await startSSLCheckProcessor()
+
+    console.log('✅ Workers rodando e aguardando jobs...')
   } catch (err) {
     console.error('❌ Erro ao iniciar worker:', err)
     process.exit(1)
@@ -39,13 +53,15 @@ async function start() {
 
 // Graceful shutdown
 async function shutdown() {
-  console.log('\n🔄 Encerrando worker...')
+  console.log('\n🔄 Encerrando workers...')
 
   await monitorCheckWorker.close()
+  await escalationWorker.close()
+  await sslCheckWorker.close()
   await prisma.$disconnect()
   await redis.quit()
 
-  console.log('✅ Worker encerrado com sucesso')
+  console.log('✅ Workers encerrados com sucesso')
   process.exit(0)
 }
 

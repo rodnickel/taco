@@ -31,6 +31,8 @@ function RegisterForm() {
     try {
       const response = await api.register(email, password, name || undefined)
       localStorage.setItem('token', response.token)
+      // Limpa qualquer team anterior (por precaução)
+      localStorage.removeItem('currentTeamId')
 
       // Verifica se ha um convite pendente
       const pendingInvite = localStorage.getItem('pendingInvite')

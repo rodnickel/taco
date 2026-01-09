@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as api from '@/lib/api'
-import type { ApiError, Monitor, StatusPage } from '@/lib/api'
+import type { ApiError, Monitor, StatusPage, MonitorGroup, StatusPageGroupData } from '@/lib/api'
 import {
   DndContext,
   closestCenter,
@@ -38,6 +38,13 @@ interface MonitorSelection {
   displayName: string
   displayOrder: number
   sectionId: string | null
+}
+
+interface GroupSelection {
+  groupId: string
+  displayName: string
+  displayOrder: number
+  isExpanded: boolean
 }
 
 // Ícone de arrastar
@@ -246,6 +253,10 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
   const [selectedMonitors, setSelectedMonitors] = useState<MonitorSelection[]>([])
   const [newSectionName, setNewSectionName] = useState('')
 
+  // Groups state
+  const [availableGroups, setAvailableGroups] = useState<MonitorGroup[]>([])
+  const [selectedGroups, setSelectedGroups] = useState<GroupSelection[]>([])
+
   // Drag state
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null)
   const [activeMonitorId, setActiveMonitorId] = useState<string | null>(null)
@@ -268,13 +279,26 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
 
   async function loadData() {
     try {
-      const [statusPageData, monitorsData] = await Promise.all([
+      const [statusPageData, monitorsData, groupsData, statusPageGroupsData] = await Promise.all([
         api.getStatusPage(id),
         api.getMonitors(),
+        api.getGroups(),
+        api.getStatusPageGroups(id),
       ])
 
       setStatusPage(statusPageData)
       setMonitors(monitorsData.monitors)
+      setAvailableGroups(groupsData)
+
+      // Load selected groups
+      setSelectedGroups(
+        statusPageGroupsData.groups.map((g) => ({
+          groupId: g.groupId,
+          displayName: g.displayName || '',
+          displayOrder: g.displayOrder,
+          isExpanded: g.isExpanded,
+        }))
+      )
 
       // Populate form
       setName(statusPageData.name)
@@ -453,6 +477,33 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
     }
   }
 
+  // Group management
+  function handleGroupToggle(groupId: string) {
+    setSelectedGroups((prev) => {
+      const exists = prev.find((g) => g.groupId === groupId)
+      if (exists) {
+        return prev.filter((g) => g.groupId !== groupId)
+      }
+      return [...prev, { groupId, displayName: '', displayOrder: prev.length, isExpanded: true }]
+    })
+  }
+
+  function handleGroupDisplayNameChange(groupId: string, displayName: string) {
+    setSelectedGroups((prev) =>
+      prev.map((g) =>
+        g.groupId === groupId ? { ...g, displayName } : g
+      )
+    )
+  }
+
+  function handleGroupExpandedChange(groupId: string, isExpanded: boolean) {
+    setSelectedGroups((prev) =>
+      prev.map((g) =>
+        g.groupId === groupId ? { ...g, isExpanded } : g
+      )
+    )
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -491,6 +542,16 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
           displayName: m.displayName || null,
           displayOrder: m.displayOrder,
           sectionId: m.sectionId,
+        })),
+      })
+
+      // Update groups
+      await api.updateStatusPageGroups(id, {
+        groups: selectedGroups.map((g) => ({
+          groupId: g.groupId,
+          displayName: g.displayName || null,
+          displayOrder: g.displayOrder,
+          isExpanded: g.isExpanded,
         })),
       })
 
@@ -990,6 +1051,174 @@ export default function EditStatusPagePage({ params }: { params: Promise<{ id: s
               {selectedMonitors.length} monitor{selectedMonitors.length > 1 ? 's' : ''} selecionado{selectedMonitors.length > 1 ? 's' : ''}
             </p>
           )}
+        </div>
+
+        {/* Groups Selection */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Grupos</h2>
+            <p className="text-sm text-zinc-400 mt-1">
+              Adicione grupos de monitors para exibição agregada na página pública
+            </p>
+          </div>
+
+          {availableGroups.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-zinc-400 mb-4">Nenhum grupo encontrado</p>
+              <Link
+                href="/groups/new"
+                className="text-orange-400 hover:text-orange-300 text-sm"
+              >
+                Criar primeiro grupo
+              </Link>
+            </div>
+          ) : (
+            <>
+              {/* Available groups */}
+              <div className="space-y-2">
+                <p className="text-xs text-zinc-500 uppercase tracking-wide mb-2">Grupos disponíveis</p>
+                {availableGroups
+                  .filter((g) => !selectedGroups.find((sg) => sg.groupId === g.id))
+                  .map((group) => (
+                    <label
+                      key={group.id}
+                      className="flex items-center gap-3 p-3 rounded-lg cursor-pointer bg-zinc-800 border border-transparent hover:border-zinc-700"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={false}
+                        onChange={() => handleGroupToggle(group.id)}
+                        className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
+                      />
+                      <div className="flex-1">
+                        <p className="text-white font-medium">{group.name}</p>
+                        {group.description && (
+                          <p className="text-xs text-zinc-500">{group.description}</p>
+                        )}
+                      </div>
+                      <span className="text-sm text-zinc-400">
+                        {group.monitors?.length || 0} monitors
+                      </span>
+                    </label>
+                  ))}
+                {availableGroups.filter((g) => !selectedGroups.find((sg) => sg.groupId === g.id)).length === 0 && (
+                  <p className="text-zinc-500 text-sm italic">Todos os grupos foram selecionados</p>
+                )}
+              </div>
+
+              {/* Selected groups */}
+              {selectedGroups.length > 0 && (
+                <div className="space-y-3 mt-6">
+                  <p className="text-xs text-zinc-500 uppercase tracking-wide mb-2">
+                    Grupos selecionados ({selectedGroups.length})
+                  </p>
+                  {selectedGroups.map((sg) => {
+                    const group = availableGroups.find((g) => g.id === sg.groupId)
+                    if (!group) return null
+
+                    return (
+                      <div
+                        key={sg.groupId}
+                        className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/30 space-y-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            checked={true}
+                            onChange={() => handleGroupToggle(sg.groupId)}
+                            className="w-4 h-4 mt-1 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
+                          />
+                          <div className="flex-1">
+                            <p className="text-white font-medium">{group.name}</p>
+                            {group.description && (
+                              <p className="text-xs text-zinc-500">{group.description}</p>
+                            )}
+                          </div>
+                          <span className="text-sm text-zinc-400">
+                            {group.monitors?.length || 0} monitors
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3 ml-7">
+                          {/* Display name */}
+                          <input
+                            type="text"
+                            value={sg.displayName}
+                            onChange={(e) => handleGroupDisplayNameChange(sg.groupId, e.target.value)}
+                            placeholder="Nome customizado (opcional)"
+                            className="px-3 py-1.5 text-sm bg-zinc-800 border border-zinc-700 rounded text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
+                          />
+
+                          {/* Expanded toggle */}
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={sg.isExpanded}
+                              onChange={(e) => handleGroupExpandedChange(sg.groupId, e.target.checked)}
+                              className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
+                            />
+                            <span className="text-sm text-zinc-400">Expandido por padrão</span>
+                          </label>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+
+              {selectedGroups.length > 0 && (
+                <p className="text-sm text-zinc-400">
+                  {selectedGroups.length} grupo{selectedGroups.length > 1 ? 's' : ''} selecionado{selectedGroups.length > 1 ? 's' : ''}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Widget Embed */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold text-white">Widget Embed</h2>
+            <p className="text-sm text-zinc-400 mt-1">
+              Incorpore um widget de status no seu site
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {/* Badge size */}
+            <div>
+              <p className="text-sm font-medium text-zinc-300 mb-2">Badge (mini)</p>
+              <div className="bg-zinc-800 rounded-lg p-4 font-mono text-sm text-zinc-300 overflow-x-auto">
+                <code>{`<div data-taco-status="${slug}" data-taco-size="badge"></div>
+<script src="${typeof window !== 'undefined' ? window.location.origin : ''}/api/public/status/${slug}/widget.js"></script>`}</code>
+              </div>
+            </div>
+
+            {/* Compact size */}
+            <div>
+              <p className="text-sm font-medium text-zinc-300 mb-2">Compacto</p>
+              <div className="bg-zinc-800 rounded-lg p-4 font-mono text-sm text-zinc-300 overflow-x-auto">
+                <code>{`<div data-taco-status="${slug}" data-taco-size="compact"></div>
+<script src="${typeof window !== 'undefined' ? window.location.origin : ''}/api/public/status/${slug}/widget.js"></script>`}</code>
+              </div>
+            </div>
+
+            {/* Default size */}
+            <div>
+              <p className="text-sm font-medium text-zinc-300 mb-2">Padrão</p>
+              <div className="bg-zinc-800 rounded-lg p-4 font-mono text-sm text-zinc-300 overflow-x-auto">
+                <code>{`<div data-taco-status="${slug}"></div>
+<script src="${typeof window !== 'undefined' ? window.location.origin : ''}/api/public/status/${slug}/widget.js"></script>`}</code>
+              </div>
+            </div>
+
+            <div className="text-xs text-zinc-500 space-y-1">
+              <p><strong>Opções disponíveis:</strong></p>
+              <p>• <code className="bg-zinc-800 px-1 rounded">data-taco-size</code>: "badge", "compact" ou padrão</p>
+              <p>• <code className="bg-zinc-800 px-1 rounded">data-taco-label</code>: "false" para ocultar label</p>
+              <p>• <code className="bg-zinc-800 px-1 rounded">data-taco-url</code>: URL customizada para o link</p>
+            </div>
+          </div>
         </div>
 
         {/* Buttons */}

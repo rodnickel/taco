@@ -279,6 +279,11 @@ export async function acceptInvite(token: string) {
 // Tipos de Monitors
 // ============================================
 
+export interface RequestHeader {
+  key: string
+  value: string
+}
+
 export interface Monitor {
   id: string
   name: string
@@ -290,6 +295,13 @@ export interface Monitor {
   checkSsl: boolean
   active: boolean
   alertsEnabled: boolean
+  // Configurações avançadas
+  recoveryPeriod: number
+  confirmationPeriod: number
+  followRedirects: boolean
+  requestBody: string | null
+  requestHeaders: RequestHeader[] | null
+  // Timestamps e status
   createdAt: string
   updatedAt: string
   teamId: string
@@ -297,6 +309,7 @@ export interface Monitor {
   lastCheck?: string
   lastLatency?: number
   uptimePercentage?: number
+  consecutiveFails?: number
 }
 
 export interface MonitorListResponse {
@@ -309,25 +322,37 @@ export interface MonitorListResponse {
 export interface CreateMonitorData {
   name: string
   url: string
-  method?: 'GET' | 'POST' | 'HEAD'
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD'
   intervalSeconds?: number
   timeout?: number
   expectedStatus?: number
   checkSsl?: boolean
   active?: boolean
   alertsEnabled?: boolean
+  // Configurações avançadas
+  recoveryPeriod?: number
+  confirmationPeriod?: number
+  followRedirects?: boolean
+  requestBody?: string | null
+  requestHeaders?: RequestHeader[] | null
 }
 
 export interface UpdateMonitorData {
   name?: string
   url?: string
-  method?: 'GET' | 'POST' | 'HEAD'
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD'
   intervalSeconds?: number
   timeout?: number
   expectedStatus?: number
   checkSsl?: boolean
   active?: boolean
   alertsEnabled?: boolean
+  // Configurações avançadas
+  recoveryPeriod?: number
+  confirmationPeriod?: number
+  followRedirects?: boolean
+  requestBody?: string | null
+  requestHeaders?: RequestHeader[] | null
 }
 
 // ============================================
@@ -379,7 +404,7 @@ export interface DailyUptimeData {
   downChecks: number
   avgLatency: number | null
   uptimePercentage: number
-  status: 'up' | 'down' | 'degraded' | 'partial' | 'no_data'
+  status: 'up' | 'down' | 'degraded' | 'no_data'
 }
 
 export interface MonitorHistoryResponse {
@@ -582,6 +607,19 @@ export interface PublicSection {
   monitors: PublicMonitor[]
 }
 
+export interface PublicGroup {
+  id: string
+  name: string
+  description: string | null
+  displayOrder: number
+  isExpanded: boolean
+  status: 'up' | 'down' | 'partial' | 'degraded' | 'unknown'
+  monitorsUp: number
+  monitorsDown: number
+  monitorsTotal: number
+  monitors: PublicMonitor[]
+}
+
 export interface PublicStatusPage {
   slug: string
   name: string
@@ -596,6 +634,7 @@ export interface PublicStatusPage {
   historyDays: number
   sections: PublicSection[]
   monitors: PublicMonitor[]
+  groups: PublicGroup[]
 }
 
 // ============================================
@@ -631,6 +670,42 @@ export async function updateStatusPageLayout(id: string, data: UpdateStatusPageL
   })
 }
 
+// Tipo para grupo na status page
+export interface StatusPageGroupData {
+  groupId: string
+  displayName: string | null
+  displayOrder: number
+  isExpanded: boolean
+  group: {
+    id: string
+    name: string
+    description: string | null
+    monitorsCount: number
+    monitorsUp: number
+    monitorsDown: number
+  }
+}
+
+export interface UpdateStatusPageGroupsData {
+  groups: {
+    groupId: string
+    displayName?: string | null
+    displayOrder: number
+    isExpanded: boolean
+  }[]
+}
+
+export async function getStatusPageGroups(id: string) {
+  return request<{ groups: StatusPageGroupData[] }>(`/status-pages/${id}/groups`)
+}
+
+export async function updateStatusPageGroups(id: string, data: UpdateStatusPageGroupsData) {
+  return request<StatusPage>(`/status-pages/${id}/groups`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
 export async function deleteStatusPage(id: string) {
   return request<void>(`/status-pages/${id}`, {
     method: 'DELETE',
@@ -644,4 +719,262 @@ export async function checkSlugAvailable(slug: string) {
 // Rota pública (não requer autenticação)
 export async function getPublicStatusPage(slug: string) {
   return request<PublicStatusPage>(`/public/status/${slug}`)
+}
+
+// ============================================
+// Tipos de Incidentes Públicos
+// ============================================
+
+export interface PublicIncidentUpdate {
+  id: string
+  message: string
+  status: string
+  createdAt: string
+}
+
+export interface PublicIncident {
+  id: string
+  title: string
+  status: 'ongoing' | 'acknowledged' | 'resolved'
+  cause: string | null
+  startedAt: string
+  resolvedAt: string | null
+  duration: number // em segundos
+  monitor: {
+    id: string
+    name: string
+  }
+  updates: PublicIncidentUpdate[]
+}
+
+export interface PublicIncidentsResponse {
+  incidents: PublicIncident[]
+  total: number
+  limit: number
+  offset: number
+}
+
+// ============================================
+// Tipos de Manutenções Públicas
+// ============================================
+
+export interface PublicMaintenance {
+  id: string
+  name: string
+  description: string | null
+  startTime: string
+  endTime: string
+  status: 'ongoing' | 'upcoming' | 'past'
+  monitors: {
+    id: string
+    name: string
+  }[]
+}
+
+export interface PublicMaintenancesResponse {
+  maintenances: PublicMaintenance[]
+}
+
+// ============================================
+// Funções de Status Page Pública
+// ============================================
+
+export async function getPublicIncidents(
+  slug: string,
+  params?: { limit?: number; offset?: number; status?: 'all' | 'ongoing' | 'resolved' }
+) {
+  const searchParams = new URLSearchParams()
+  if (params?.limit) searchParams.set('limit', String(params.limit))
+  if (params?.offset) searchParams.set('offset', String(params.offset))
+  if (params?.status) searchParams.set('status', params.status)
+
+  const query = searchParams.toString()
+  return request<PublicIncidentsResponse>(`/public/status/${slug}/incidents${query ? `?${query}` : ''}`)
+}
+
+export async function getPublicMaintenances(slug: string) {
+  return request<PublicMaintenancesResponse>(`/public/status/${slug}/maintenances`)
+}
+
+// ============================================
+// Tipos de Incidents
+// ============================================
+
+export interface IncidentUpdate {
+  id: string
+  message: string
+  status: string
+  createdAt: string
+}
+
+export interface Incident {
+  id: string
+  title: string
+  status: 'ongoing' | 'acknowledged' | 'resolved'
+  cause: string | null
+  startedAt: string
+  resolvedAt: string | null
+  acknowledgedAt: string | null
+  createdAt: string
+  updatedAt: string
+  duration: number // em segundos
+  monitor: {
+    id: string
+    name: string
+    url: string
+  }
+  acknowledgedBy: {
+    id: string
+    name: string | null
+    email: string
+  } | null
+  updates?: IncidentUpdate[]
+  _count?: {
+    updates: number
+  }
+}
+
+export interface IncidentListResponse {
+  incidents: Incident[]
+  total: number
+  limit: number
+  offset: number
+}
+
+// ============================================
+// Funcoes de Incidents
+// ============================================
+
+export async function getIncidents(params?: {
+  status?: 'ongoing' | 'acknowledged' | 'resolved' | 'all'
+  monitorId?: string
+  limit?: number
+  offset?: number
+}) {
+  const searchParams = new URLSearchParams()
+  if (params?.status) searchParams.set('status', params.status)
+  if (params?.monitorId) searchParams.set('monitorId', params.monitorId)
+  if (params?.limit) searchParams.set('limit', String(params.limit))
+  if (params?.offset) searchParams.set('offset', String(params.offset))
+
+  const query = searchParams.toString()
+  return request<IncidentListResponse>(`/incidents${query ? `?${query}` : ''}`)
+}
+
+export async function getIncident(id: string) {
+  return request<Incident>(`/incidents/${id}`)
+}
+
+export async function getIncidentCount() {
+  return request<{ count: number }>('/incidents/count')
+}
+
+export async function acknowledgeIncident(id: string) {
+  return request<Incident>(`/incidents/${id}/acknowledge`, {
+    method: 'POST',
+  })
+}
+
+export async function resolveIncident(id: string, message?: string) {
+  return request<Incident>(`/incidents/${id}/resolve`, {
+    method: 'POST',
+    body: message ? JSON.stringify({ message }) : undefined,
+  })
+}
+
+export async function addIncidentUpdate(id: string, message: string, status?: string) {
+  return request<IncidentUpdate>(`/incidents/${id}/updates`, {
+    method: 'POST',
+    body: JSON.stringify({ message, status }),
+  })
+}
+
+// ============================================
+// Tipos de Grupos de Monitores
+// ============================================
+
+export type GroupStatus = 'up' | 'down' | 'partial' | 'degraded' | 'unknown'
+
+export interface MonitorInGroup {
+  id: string
+  name: string
+  url: string
+  currentStatus: string | null
+  lastCheck: string | null
+  lastLatency: number | null
+}
+
+export interface MonitorGroup {
+  id: string
+  name: string
+  description: string | null
+  status: GroupStatus
+  monitorsUp: number
+  monitorsDown: number
+  monitorsTotal: number
+  monitors: MonitorInGroup[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateGroupInput {
+  name: string
+  description?: string
+  monitorIds?: string[]
+}
+
+export interface UpdateGroupInput {
+  name?: string
+  description?: string | null
+  monitorIds?: string[]
+}
+
+// ============================================
+// API de Grupos de Monitores
+// ============================================
+
+export async function getGroups() {
+  return request<MonitorGroup[]>('/groups')
+}
+
+export async function getGroup(id: string) {
+  return request<MonitorGroup>(`/groups/${id}`)
+}
+
+export async function getUngroupedMonitors() {
+  return request<MonitorInGroup[]>('/groups/ungrouped')
+}
+
+export async function createGroup(data: CreateGroupInput) {
+  return request<MonitorGroup>('/groups', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function updateGroup(id: string, data: UpdateGroupInput) {
+  return request<MonitorGroup>(`/groups/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function deleteGroup(id: string) {
+  return request<void>(`/groups/${id}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function addMonitorsToGroup(groupId: string, monitorIds: string[]) {
+  return request<MonitorGroup>(`/groups/${groupId}/monitors`, {
+    method: 'POST',
+    body: JSON.stringify({ monitorIds }),
+  })
+}
+
+export async function removeMonitorsFromGroup(groupId: string, monitorIds: string[]) {
+  return request<MonitorGroup>(`/groups/${groupId}/monitors`, {
+    method: 'DELETE',
+    body: JSON.stringify({ monitorIds }),
+  })
 }

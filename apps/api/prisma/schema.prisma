@@ -35,6 +35,9 @@ model User {
   memberships TeamMember[]
   sentInvites TeamInvite[] @relation("InvitedBy")
 
+  // Incidentes que o usuário reconheceu
+  acknowledgedIncidents Incident[] @relation("AcknowledgedIncidents")
+
   @@map("users")
 }
 
@@ -53,11 +56,15 @@ model Team {
   owner   User   @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
 
   // Relacionamentos
-  members       TeamMember[]
-  invites       TeamInvite[]
-  monitors      Monitor[]
-  alertChannels AlertChannel[]
-  statusPages   StatusPage[]
+  members            TeamMember[]
+  invites            TeamInvite[]
+  monitors           Monitor[]
+  monitorGroups      MonitorGroup[]
+  alertChannels      AlertChannel[]
+  statusPages        StatusPage[]
+  incidents          Incident[]
+  escalationPolicies EscalationPolicy[]
+  maintenanceWindows MaintenanceWindow[]
 
   @@index([ownerId])
   @@map("teams")
@@ -114,6 +121,28 @@ model TeamInvite {
 }
 
 // ============================================
+// MODELO: MonitorGroup (Grupo de Monitores)
+// ============================================
+model MonitorGroup {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relacionamento com Team
+  teamId String @map("team_id")
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Relacionamentos
+  monitors    Monitor[]
+  statusPages StatusPageGroup[]
+
+  @@index([teamId])
+  @@map("monitor_groups")
+}
+
+// ============================================
 // MODELO: Monitor (Serviço/URL a ser monitorado)
 // ============================================
 model Monitor {
@@ -130,21 +159,41 @@ model Monitor {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
+  // Configurações avançadas
+  recoveryPeriod     Int     @default(180) @map("recovery_period") // Segundos que deve ficar UP para considerar recuperado
+  confirmationPeriod Int     @default(0) @map("confirmation_period") // Quantas falhas consecutivas antes de marcar DOWN (0 = imediato)
+  followRedirects    Boolean @default(true) @map("follow_redirects") // Seguir redirecionamentos HTTP
+  requestBody        String? @map("request_body") // Body para POST/PUT/PATCH
+  requestHeaders     Json?   @map("request_headers") // Headers customizados como JSON
+
   // Campos de status atual (atualizados pelo worker)
-  currentStatus String?   @map("current_status") // "up" | "down" | "degraded"
-  lastCheck     DateTime? @map("last_check")
-  lastLatency   Int?      @map("last_latency") // em milissegundos
+  currentStatus    String?   @map("current_status") // "up" | "down" | "degraded"
+  lastCheck        DateTime? @map("last_check")
+  lastLatency      Int?      @map("last_latency") // em milissegundos
+  consecutiveFails Int       @default(0) @map("consecutive_fails") // Contador de falhas consecutivas
 
   // Relacionamento com Team
   teamId String @map("team_id")
   team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
+  // Relacionamento opcional com Group
+  groupId String?       @map("group_id")
+  group   MonitorGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  // Relacionamento opcional com Política de Escalonamento
+  escalationPolicyId String?           @map("escalation_policy_id")
+  escalationPolicy   EscalationPolicy? @relation("MonitorEscalationPolicy", fields: [escalationPolicyId], references: [id], onDelete: SetNull)
+
   // Relacionamentos
-  checks             Check[]
-  alerts             Alert[]
-  statusPageMonitors StatusPageMonitor[]
+  checks              Check[]
+  alerts              Alert[]
+  statusPageMonitors  StatusPageMonitor[]
+  incidents           Incident[]
+  maintenanceMonitors MaintenanceMonitor[]
 
   @@index([teamId])
+  @@index([groupId])
+  @@index([escalationPolicyId])
   @@index([active])
   @@map("monitors")
 }
@@ -173,9 +222,9 @@ model Check {
 // ============================================
 model AlertChannel {
   id        String   @id @default(cuid())
-  type      String // "email" | "webhook" | "slack"
+  type      String // "email" | "webhook" | "slack" | "whatsapp" | "telegram"
   name      String
-  config    Json // { email: "..." } ou { webhookUrl: "..." }
+  config    Json // { email: "..." } ou { webhookUrl: "..." } ou { phone: "...", instanceName: "..." }
   active    Boolean  @default(true)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -185,10 +234,76 @@ model AlertChannel {
   team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   // Relacionamentos
-  alerts Alert[]
+  alerts             Alert[]
+  escalationPolicies EscalationLevel[]
 
   @@index([teamId])
   @@map("alert_channels")
+}
+
+// ============================================
+// MODELO: EscalationPolicy (Política de escalonamento)
+// ============================================
+model EscalationPolicy {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relacionamento com Team
+  teamId String @map("team_id")
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Relacionamentos
+  levels   EscalationLevel[]
+  monitors Monitor[]         @relation("MonitorEscalationPolicy")
+
+  @@index([teamId])
+  @@map("escalation_policies")
+}
+
+// ============================================
+// MODELO: EscalationLevel (Nível de escalonamento)
+// ============================================
+model EscalationLevel {
+  id             String @id @default(cuid())
+  level          Int // 1, 2, 3... (ordem de escalonamento)
+  delayMinutes   Int    @default(0) @map("delay_minutes") // Delay antes de notificar (0 = imediato)
+  repeatCount    Int    @default(1) @map("repeat_count") // Quantas vezes repetir antes de escalar
+  repeatInterval Int    @default(5) @map("repeat_interval") // Intervalo em minutos entre repetições
+
+  // Relacionamento com EscalationPolicy
+  policyId String           @map("policy_id")
+  policy   EscalationPolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+  // Relacionamento com AlertChannel
+  channelId String       @map("channel_id")
+  channel   AlertChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([policyId, level])
+  @@index([policyId])
+  @@map("escalation_levels")
+}
+
+// ============================================
+// MODELO: PendingEscalation (Escalonamento pendente)
+// ============================================
+model PendingEscalation {
+  id            String    @id @default(cuid())
+  incidentId    String    @map("incident_id")
+  currentLevel  Int       @default(1) @map("current_level")
+  attemptCount  Int       @default(0) @map("attempt_count")
+  nextAttemptAt DateTime  @map("next_attempt_at")
+  acknowledged  Boolean   @default(false)
+  completedAt   DateTime? @map("completed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@index([incidentId])
+  @@index([nextAttemptAt])
+  @@index([acknowledged])
+  @@map("pending_escalations")
 }
 
 // ============================================
@@ -247,6 +362,7 @@ model StatusPage {
   // Relacionamentos
   monitors StatusPageMonitor[]
   sections StatusPageSection[]
+  groups   StatusPageGroup[]
 
   @@index([teamId])
   @@index([slug])
@@ -299,21 +415,59 @@ model StatusPageMonitor {
 }
 
 // ============================================
-// MODELO: Incident (Incidente - Fase 3)
+// MODELO: StatusPageGroup (Grupo na Status Page)
+// ============================================
+model StatusPageGroup {
+  id           String  @id @default(cuid())
+  displayName  String? @map("display_name") // Nome customizado para exibir
+  displayOrder Int     @default(0) @map("display_order") // Ordem de exibição
+  isExpanded   Boolean @default(true) @map("is_expanded") // Se mostra monitors por padrão
+
+  // Relacionamento com StatusPage
+  statusPageId String     @map("status_page_id")
+  statusPage   StatusPage @relation(fields: [statusPageId], references: [id], onDelete: Cascade)
+
+  // Relacionamento com MonitorGroup
+  groupId String       @map("group_id")
+  group   MonitorGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([statusPageId, groupId])
+  @@index([statusPageId])
+  @@map("status_page_groups")
+}
+
+// ============================================
+// MODELO: Incident (Incidente)
 // ============================================
 model Incident {
   id         String    @id @default(cuid())
   title      String
-  status     String // "investigating" | "identified" | "monitoring" | "resolved"
-  severity   String // "minor" | "major" | "critical"
+  status     String // "ongoing" | "acknowledged" | "resolved"
+  cause      String? // Causa do incidente (ex: "Timeout", "Status 500")
   startedAt  DateTime  @default(now()) @map("started_at")
   resolvedAt DateTime? @map("resolved_at")
   createdAt  DateTime  @default(now()) @map("created_at")
   updatedAt  DateTime  @updatedAt @map("updated_at")
 
+  // Acknowledge info
+  acknowledgedAt DateTime? @map("acknowledged_at")
+  acknowledgedById String? @map("acknowledged_by_id")
+  acknowledgedBy   User?   @relation("AcknowledgedIncidents", fields: [acknowledgedById], references: [id])
+
+  // Relacionamento com Monitor (quem gerou o incidente)
+  monitorId String  @map("monitor_id")
+  monitor   Monitor @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+
+  // Relacionamento com Team
+  teamId String @map("team_id")
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
   // Relacionamentos
   updates IncidentUpdate[]
 
+  @@index([monitorId])
+  @@index([teamId])
+  @@index([status])
   @@map("incidents")
 }
 
@@ -332,4 +486,58 @@ model IncidentUpdate {
 
   @@index([incidentId])
   @@map("incident_updates")
+}
+
+// ============================================
+// MODELO: MaintenanceWindow (Janela de Manutenção)
+// ============================================
+model MaintenanceWindow {
+  id          String   @id @default(cuid())
+  name        String // Nome da manutenção (ex: "Deploy v2.0")
+  description String? // Descrição opcional
+  startTime   DateTime @map("start_time") // Início da manutenção
+  endTime     DateTime @map("end_time") // Fim da manutenção
+  active      Boolean  @default(true) // Se está ativa (pode ser desativada manualmente)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Tipo de janela: "scheduled" (agendada) ou "emergency" (emergência)
+  type String @default("scheduled")
+
+  // Opções de silenciamento
+  suppressAlerts    Boolean @default(true) @map("suppress_alerts") // Não enviar alertas
+  suppressIncidents Boolean @default(true) @map("suppress_incidents") // Não criar incidentes
+  showOnStatusPage  Boolean @default(true) @map("show_on_status_page") // Mostrar na status page
+
+  // Relacionamento com Team
+  teamId String @map("team_id")
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  // Relacionamentos
+  monitors MaintenanceMonitor[]
+
+  @@index([teamId])
+  @@index([startTime, endTime])
+  @@index([active])
+  @@map("maintenance_windows")
+}
+
+// ============================================
+// MODELO: MaintenanceMonitor (Monitores afetados)
+// ============================================
+model MaintenanceMonitor {
+  id String @id @default(cuid())
+
+  // Relacionamento com MaintenanceWindow
+  maintenanceId String            @map("maintenance_id")
+  maintenance   MaintenanceWindow @relation(fields: [maintenanceId], references: [id], onDelete: Cascade)
+
+  // Relacionamento com Monitor
+  monitorId String  @map("monitor_id")
+  monitor   Monitor @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+
+  @@unique([maintenanceId, monitorId])
+  @@index([maintenanceId])
+  @@index([monitorId])
+  @@map("maintenance_monitors")
 }

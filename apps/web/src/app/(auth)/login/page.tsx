@@ -21,6 +21,8 @@ export default function LoginPage() {
     try {
       const response = await api.login(email, password)
       localStorage.setItem('token', response.token)
+      // Limpa o team anterior para evitar conflitos entre contas diferentes
+      localStorage.removeItem('currentTeamId')
 
       // Verifica se ha um convite pendente
       const pendingInvite = localStorage.getItem('pendingInvite')

@@ -17,6 +17,13 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().email().default('noreply@example.com'),
 
+  // WhatsApp (Evolution API)
+  EVOLUTION_API_URL: z.string().url().optional(),
+  EVOLUTION_API_KEY: z.string().optional(),
+
+  // Telegram Bot
+  TELEGRAM_BOT_TOKEN: z.string().optional(),
+
   // App
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   API_PORT: z.coerce.number().default(3333),

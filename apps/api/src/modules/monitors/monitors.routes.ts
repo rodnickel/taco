@@ -7,6 +7,7 @@ import {
 } from './monitors.schema.js'
 import * as monitorsService from './monitors.service.js'
 import { createTeamAuthHook } from '../../lib/team-auth.js'
+import { checkMonitorSSL } from '../../services/ssl-check.service.js'
 
 // ============================================
 // Rotas de Monitors - CRUD completo
@@ -184,5 +185,44 @@ export async function monitorsRoutes(app: FastifyInstance) {
     }
 
     return reply.status(204).send()
+  })
+
+  // GET /monitors/:id/ssl - Verificar certificado SSL do monitor (requer VIEWER)
+  app.get('/:id/ssl', { onRequest: [viewerAuth] }, async (request, reply) => {
+    const parseResult = monitorIdSchema.safeParse(request.params)
+
+    if (!parseResult.success) {
+      return reply.status(400).send({
+        error: 'ID inválido',
+      })
+    }
+
+    // Verifica se o monitor existe e pertence ao time
+    const monitor = await monitorsService.findMonitorById(
+      request.teamContext!.teamId,
+      parseResult.data.id
+    )
+
+    if (!monitor) {
+      return reply.status(404).send({
+        error: 'Monitor não encontrado',
+      })
+    }
+
+    // Verifica o certificado SSL
+    const sslInfo = await checkMonitorSSL(parseResult.data.id)
+
+    if (!sslInfo) {
+      return reply.status(500).send({
+        error: 'Erro ao verificar certificado SSL',
+      })
+    }
+
+    return reply.send({
+      monitorId: monitor.id,
+      monitorName: monitor.name,
+      url: monitor.url,
+      ssl: sslInfo,
+    })
   })
 }

@@ -4,6 +4,12 @@ import { z } from 'zod'
 // Schemas de Validação - Monitors
 // ============================================
 
+// Schema para headers customizados
+const requestHeaderSchema = z.object({
+  key: z.string().min(1, 'Nome do header é obrigatório'),
+  value: z.string(),
+})
+
 // Schema para criar um monitor
 export const createMonitorSchema = z.object({
   name: z
@@ -17,13 +23,13 @@ export const createMonitorSchema = z.object({
       (url) => url.startsWith('http://') || url.startsWith('https://'),
       'URL deve começar com http:// ou https://'
     ),
-  method: z.enum(['GET', 'POST', 'HEAD']).default('GET'),
+  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD']).default('GET'),
   intervalSeconds: z
     .number()
     .int()
-    .min(5, 'Intervalo mínimo é 5 segundos')
+    .min(30, 'Intervalo mínimo é 30 segundos')
     .max(3600, 'Intervalo máximo é 3600 segundos (1 hora)')
-    .default(300),
+    .default(180),
   timeout: z
     .number()
     .int()
@@ -39,6 +45,28 @@ export const createMonitorSchema = z.object({
   checkSsl: z.boolean().default(true),
   active: z.boolean().default(true),
   alertsEnabled: z.boolean().default(true),
+  // Configurações avançadas
+  recoveryPeriod: z
+    .number()
+    .int()
+    .min(0, 'Recovery period deve ser >= 0')
+    .max(3600, 'Recovery period máximo é 3600 segundos')
+    .default(180),
+  confirmationPeriod: z
+    .number()
+    .int()
+    .min(0, 'Confirmation period deve ser >= 0')
+    .max(10, 'Confirmation period máximo é 10')
+    .default(0),
+  followRedirects: z.boolean().default(true),
+  requestBody: z
+    .string()
+    .max(10000, 'Request body deve ter no máximo 10000 caracteres')
+    .nullable()
+    .optional(),
+  requestHeaders: z.array(requestHeaderSchema).max(20, 'Máximo de 20 headers').nullable().optional(),
+  // Política de escalonamento
+  escalationPolicyId: z.string().nullable().optional(),
 })
 
 // Schema para atualizar um monitor
@@ -63,6 +91,12 @@ export type UpdateMonitorInput = z.infer<typeof updateMonitorSchema>
 export type MonitorIdParams = z.infer<typeof monitorIdSchema>
 export type ListMonitorsQuery = z.infer<typeof listMonitorsQuerySchema>
 
+// Tipo para header customizado
+export interface RequestHeader {
+  key: string
+  value: string
+}
+
 // Tipo do Monitor com status atual
 export interface MonitorWithStatus {
   id: string
@@ -75,6 +109,13 @@ export interface MonitorWithStatus {
   checkSsl: boolean
   active: boolean
   alertsEnabled: boolean
+  // Configurações avançadas
+  recoveryPeriod: number
+  confirmationPeriod: number
+  followRedirects: boolean
+  requestBody: string | null
+  requestHeaders: RequestHeader[] | null
+  // Timestamps
   createdAt: Date
   updatedAt: Date
   teamId: string
@@ -83,4 +124,5 @@ export interface MonitorWithStatus {
   lastCheck?: Date
   lastLatency?: number
   uptimePercentage?: number
+  consecutiveFails?: number
 }

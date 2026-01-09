@@ -1,24 +1,47 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as api from '@/lib/api'
-import type { ApiError } from '@/lib/api'
+import type { ApiError, RequestHeader } from '@/lib/api'
 
 export default function NewMonitorPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showAdvanced, setShowAdvanced] = useState(false)
 
+  // Campos básicos
   const [name, setName] = useState('')
   const [url, setUrl] = useState('')
-  const [method, setMethod] = useState<'GET' | 'POST' | 'HEAD'>('GET')
-  const [intervalSeconds, setIntervalSeconds] = useState(300)
+  const [method, setMethod] = useState<'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD'>('GET')
+  const [intervalSeconds, setIntervalSeconds] = useState(180)
   const [timeout, setTimeout] = useState(30)
   const [expectedStatus, setExpectedStatus] = useState(200)
   const [checkSsl, setCheckSsl] = useState(true)
   const [alertsEnabled, setAlertsEnabled] = useState(true)
+
+  // Campos avançados
+  const [recoveryPeriod, setRecoveryPeriod] = useState(180)
+  const [confirmationPeriod, setConfirmationPeriod] = useState(0)
+  const [followRedirects, setFollowRedirects] = useState(true)
+  const [requestBody, setRequestBody] = useState('')
+  const [headers, setHeaders] = useState<RequestHeader[]>([])
+
+  function addHeader() {
+    setHeaders([...headers, { key: '', value: '' }])
+  }
+
+  function removeHeader(index: number) {
+    setHeaders(headers.filter((_, i) => i !== index))
+  }
+
+  function updateHeader(index: number, field: 'key' | 'value', value: string) {
+    const newHeaders = [...headers]
+    newHeaders[index][field] = value
+    setHeaders(newHeaders)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -26,6 +49,9 @@ export default function NewMonitorPage() {
     setLoading(true)
 
     try {
+      // Filtra headers vazios
+      const validHeaders = headers.filter(h => h.key.trim() !== '')
+
       await api.createMonitor({
         name,
         url,
@@ -35,6 +61,11 @@ export default function NewMonitorPage() {
         expectedStatus,
         checkSsl,
         alertsEnabled,
+        recoveryPeriod,
+        confirmationPeriod,
+        followRedirects,
+        requestBody: requestBody.trim() || null,
+        requestHeaders: validHeaders.length > 0 ? validHeaders : null,
       })
 
       router.push('/monitors')
@@ -80,7 +111,10 @@ export default function NewMonitorPage() {
           </div>
         )}
 
+        {/* Configurações Básicas */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6">
+          <h2 className="text-lg font-semibold text-white">Configurações Básicas</h2>
+
           {/* Nome */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-zinc-300 mb-2">
@@ -123,11 +157,14 @@ export default function NewMonitorPage() {
               <select
                 id="method"
                 value={method}
-                onChange={(e) => setMethod(e.target.value as 'GET' | 'POST' | 'HEAD')}
+                onChange={(e) => setMethod(e.target.value as typeof method)}
                 className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               >
                 <option value="GET">GET</option>
                 <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="PATCH">PATCH</option>
+                <option value="DELETE">DELETE</option>
                 <option value="HEAD">HEAD</option>
               </select>
             </div>
@@ -152,34 +189,41 @@ export default function NewMonitorPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="interval" className="block text-sm font-medium text-zinc-300 mb-2">
-                Intervalo (segundos)
+                Frequência de verificação
               </label>
-              <input
+              <select
                 id="interval"
-                type="number"
                 value={intervalSeconds}
                 onChange={(e) => setIntervalSeconds(Number(e.target.value))}
-                min={5}
-                max={3600}
                 className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
-              />
-              <p className="text-xs text-zinc-500 mt-1">Mín: 5s, Máx: 3600s</p>
+              >
+                <option value={30}>30 segundos</option>
+                <option value={60}>1 minuto</option>
+                <option value={180}>3 minutos</option>
+                <option value={300}>5 minutos</option>
+                <option value={600}>10 minutos</option>
+                <option value={900}>15 minutos</option>
+                <option value={1800}>30 minutos</option>
+                <option value={3600}>1 hora</option>
+              </select>
             </div>
 
             <div>
               <label htmlFor="timeout" className="block text-sm font-medium text-zinc-300 mb-2">
-                Timeout (segundos)
+                Timeout da requisição
               </label>
-              <input
+              <select
                 id="timeout"
-                type="number"
                 value={timeout}
                 onChange={(e) => setTimeout(Number(e.target.value))}
-                min={5}
-                max={60}
                 className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
-              />
-              <p className="text-xs text-zinc-500 mt-1">Mín: 5s, Máx: 60s</p>
+              >
+                <option value={5}>5 segundos</option>
+                <option value={10}>10 segundos</option>
+                <option value={15}>15 segundos</option>
+                <option value={30}>30 segundos</option>
+                <option value={60}>60 segundos</option>
+              </select>
             </div>
           </div>
 
@@ -211,6 +255,155 @@ export default function NewMonitorPage() {
               </label>
             </div>
           </div>
+        </div>
+
+        {/* Configurações Avançadas */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-zinc-800/50 transition-colors"
+          >
+            <span className="text-lg font-semibold text-white">Configurações Avançadas</span>
+            <svg
+              className={`w-5 h-5 text-zinc-400 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+
+          {showAdvanced && (
+            <div className="px-6 pb-6 space-y-6 border-t border-zinc-800 pt-6">
+              {/* Recovery e Confirmation Period */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="recoveryPeriod" className="block text-sm font-medium text-zinc-300 mb-2">
+                    Período de recuperação
+                  </label>
+                  <select
+                    id="recoveryPeriod"
+                    value={recoveryPeriod}
+                    onChange={(e) => setRecoveryPeriod(Number(e.target.value))}
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
+                  >
+                    <option value={0}>Imediato</option>
+                    <option value={60}>1 minuto</option>
+                    <option value={180}>3 minutos</option>
+                    <option value={300}>5 minutos</option>
+                    <option value={600}>10 minutos</option>
+                  </select>
+                  <p className="text-xs text-zinc-500 mt-1">Tempo UP para considerar recuperado</p>
+                </div>
+
+                <div>
+                  <label htmlFor="confirmationPeriod" className="block text-sm font-medium text-zinc-300 mb-2">
+                    Período de confirmação
+                  </label>
+                  <select
+                    id="confirmationPeriod"
+                    value={confirmationPeriod}
+                    onChange={(e) => setConfirmationPeriod(Number(e.target.value))}
+                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
+                  >
+                    <option value={0}>Imediato (1 falha)</option>
+                    <option value={1}>2 falhas consecutivas</option>
+                    <option value={2}>3 falhas consecutivas</option>
+                    <option value={3}>4 falhas consecutivas</option>
+                    <option value={5}>6 falhas consecutivas</option>
+                  </select>
+                  <p className="text-xs text-zinc-500 mt-1">Falhas antes de marcar como DOWN</p>
+                </div>
+              </div>
+
+              {/* Follow Redirects */}
+              <div className="flex items-center gap-3">
+                <input
+                  id="followRedirects"
+                  type="checkbox"
+                  checked={followRedirects}
+                  onChange={(e) => setFollowRedirects(e.target.checked)}
+                  className="w-4 h-4 bg-zinc-800 border-zinc-700 rounded text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900"
+                />
+                <label htmlFor="followRedirects" className="text-sm text-zinc-300">
+                  Seguir redirecionamentos HTTP
+                </label>
+              </div>
+
+              {/* Request Body */}
+              <div>
+                <label htmlFor="requestBody" className="block text-sm font-medium text-zinc-300 mb-2">
+                  Request Body
+                  {!['POST', 'PUT', 'PATCH'].includes(method) && (
+                    <span className="text-zinc-500 font-normal ml-2">(disponível para POST, PUT, PATCH)</span>
+                  )}
+                </label>
+                <textarea
+                  id="requestBody"
+                  value={requestBody}
+                  onChange={(e) => setRequestBody(e.target.value)}
+                  rows={4}
+                  disabled={!['POST', 'PUT', 'PATCH'].includes(method)}
+                  className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder='{"key": "value"}'
+                />
+                <p className="text-xs text-zinc-500 mt-1">JSON ou form-urlencoded</p>
+              </div>
+
+              {/* Request Headers */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-zinc-300">
+                    Headers customizados
+                  </label>
+                  <button
+                    type="button"
+                    onClick={addHeader}
+                    className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
+                  >
+                    + Adicionar header
+                  </button>
+                </div>
+
+                {headers.length === 0 ? (
+                  <p className="text-sm text-zinc-500">Nenhum header customizado</p>
+                ) : (
+                  <div className="space-y-2">
+                    {headers.map((header, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={header.key}
+                          onChange={(e) => updateHeader(index, 'key', e.target.value)}
+                          placeholder="Header name"
+                          className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 text-sm"
+                        />
+                        <input
+                          type="text"
+                          value={header.value}
+                          onChange={(e) => updateHeader(index, 'value', e.target.value)}
+                          placeholder="Value"
+                          className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500 text-sm"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeHeader(index)}
+                          className="p-2 text-zinc-400 hover:text-red-400 transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Buttons */}
