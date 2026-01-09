@@ -417,6 +417,31 @@ export async function getMonitorHistory(id: string, days: number = 90) {
 }
 
 // ============================================
+// Tipos e Funções de SSL
+// ============================================
+
+export interface SSLInfo {
+  valid: boolean
+  issuer: string | null
+  subject: string | null
+  validFrom: string | null
+  validTo: string | null
+  daysUntilExpiry: number | null
+  error: string | null
+}
+
+export interface MonitorSSLResponse {
+  monitorId: string
+  monitorName: string
+  url: string
+  ssl: SSLInfo
+}
+
+export async function getMonitorSSL(id: string) {
+  return request<MonitorSSLResponse>(`/monitors/${id}/ssl`)
+}
+
+// ============================================
 // Tipos de Alert Channels
 // ============================================
 

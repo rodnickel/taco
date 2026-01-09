@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as api from '@/lib/api'
-import type { Monitor, ApiError, DailyUptimeData, Incident } from '@/lib/api'
+import type { Monitor, ApiError, DailyUptimeData, Incident, SSLInfo } from '@/lib/api'
 import { ConfirmModal, AlertModal, UptimeBar } from '@/components'
 
 const INCIDENTS_PER_PAGE = 10
@@ -73,9 +73,15 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
   const [incidentPage, setIncidentPage] = useState(0)
   const [incidentFilter, setIncidentFilter] = useState<'all' | 'ongoing' | 'acknowledged' | 'resolved'>('all')
 
+  // SSL state
+  const [sslInfo, setSSLInfo] = useState<SSLInfo | null>(null)
+  const [sslLoading, setSSLLoading] = useState(false)
+  const [sslError, setSSLError] = useState('')
+
   useEffect(() => {
     loadMonitor()
     loadHistory()
+    loadSSL()
   }, [id])
 
   useEffect(() => {
@@ -107,6 +113,20 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
     } catch (err) {
       // Silently fail - history is not critical
       console.error('Erro ao carregar histórico:', err)
+    }
+  }
+
+  async function loadSSL() {
+    setSSLLoading(true)
+    setSSLError('')
+    try {
+      const data = await api.getMonitorSSL(id)
+      setSSLInfo(data.ssl)
+    } catch (err) {
+      const apiError = err as ApiError
+      setSSLError(apiError.error || 'Erro ao verificar SSL')
+    } finally {
+      setSSLLoading(false)
     }
   }
 
@@ -339,6 +359,149 @@ export default function MonitorDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </div>
+
+      {/* SSL Certificate Info */}
+      {monitor.url.startsWith('https://') && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+              Certificado SSL
+            </h2>
+            <button
+              onClick={loadSSL}
+              disabled={sslLoading}
+              className="text-sm text-orange-400 hover:text-orange-300 disabled:opacity-50 flex items-center gap-1"
+            >
+              {sslLoading ? (
+                <div className="w-4 h-4 border-2 border-orange-400/30 border-t-orange-400 rounded-full animate-spin" />
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+              )}
+              Verificar novamente
+            </button>
+          </div>
+
+          {sslLoading && !sslInfo ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : sslError && !sslInfo ? (
+            <div className="text-center py-4">
+              <p className="text-zinc-500">{sslError}</p>
+            </div>
+          ) : sslInfo ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {/* Status */}
+              <div className="col-span-2 md:col-span-3">
+                <div className={`flex items-center gap-3 p-4 rounded-lg border ${
+                  sslInfo.valid
+                    ? sslInfo.daysUntilExpiry !== null && sslInfo.daysUntilExpiry <= 30
+                      ? 'bg-amber-500/10 border-amber-500/30'
+                      : 'bg-emerald-500/10 border-emerald-500/30'
+                    : 'bg-red-500/10 border-red-500/30'
+                }`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    sslInfo.valid
+                      ? sslInfo.daysUntilExpiry !== null && sslInfo.daysUntilExpiry <= 30
+                        ? 'bg-amber-500/20'
+                        : 'bg-emerald-500/20'
+                      : 'bg-red-500/20'
+                  }`}>
+                    {sslInfo.valid ? (
+                      sslInfo.daysUntilExpiry !== null && sslInfo.daysUntilExpiry <= 30 ? (
+                        <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                        </svg>
+                      )
+                    ) : (
+                      <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <p className={`font-medium ${
+                      sslInfo.valid
+                        ? sslInfo.daysUntilExpiry !== null && sslInfo.daysUntilExpiry <= 30
+                          ? 'text-amber-400'
+                          : 'text-emerald-400'
+                        : 'text-red-400'
+                    }`}>
+                      {sslInfo.valid
+                        ? sslInfo.daysUntilExpiry !== null && sslInfo.daysUntilExpiry <= 30
+                          ? `Expira em ${sslInfo.daysUntilExpiry} dias`
+                          : 'Certificado válido'
+                        : 'Certificado inválido'}
+                    </p>
+                    <p className="text-sm text-zinc-400">
+                      {sslInfo.error || (sslInfo.daysUntilExpiry !== null ? `${sslInfo.daysUntilExpiry} dias restantes` : '')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Emissor */}
+              <div>
+                <p className="text-zinc-500 text-sm">Emissor</p>
+                <p className="text-white font-medium mt-1">{sslInfo.issuer || '-'}</p>
+              </div>
+
+              {/* Domínio */}
+              <div>
+                <p className="text-zinc-500 text-sm">Domínio</p>
+                <p className="text-white font-medium mt-1">{sslInfo.subject || '-'}</p>
+              </div>
+
+              {/* Dias restantes */}
+              <div>
+                <p className="text-zinc-500 text-sm">Dias Restantes</p>
+                <p className={`font-medium mt-1 ${
+                  sslInfo.daysUntilExpiry !== null && sslInfo.daysUntilExpiry <= 0
+                    ? 'text-red-400'
+                    : sslInfo.daysUntilExpiry !== null && sslInfo.daysUntilExpiry <= 30
+                    ? 'text-amber-400'
+                    : 'text-emerald-400'
+                }`}>
+                  {sslInfo.daysUntilExpiry !== null ? (
+                    sslInfo.daysUntilExpiry <= 0
+                      ? `Expirado há ${Math.abs(sslInfo.daysUntilExpiry)} dias`
+                      : `${sslInfo.daysUntilExpiry} dias`
+                  ) : '-'}
+                </p>
+              </div>
+
+              {/* Válido desde */}
+              <div>
+                <p className="text-zinc-500 text-sm">Válido Desde</p>
+                <p className="text-white font-medium mt-1">
+                  {sslInfo.validFrom ? new Date(sslInfo.validFrom).toLocaleDateString('pt-BR') : '-'}
+                </p>
+              </div>
+
+              {/* Expira em */}
+              <div>
+                <p className="text-zinc-500 text-sm">Expira Em</p>
+                <p className="text-white font-medium mt-1">
+                  {sslInfo.validTo ? new Date(sslInfo.validTo).toLocaleDateString('pt-BR') : '-'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-zinc-500">Clique em "Verificar novamente" para obter informações do certificado</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Incidents */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
