@@ -1,16 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as api from '@/lib/api'
-import type { ApiError, RequestHeader } from '@/lib/api'
+import type { ApiError, RequestHeader, MonitorGroup } from '@/lib/api'
 
 export default function NewMonitorPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [groups, setGroups] = useState<MonitorGroup[]>([])
+  const [groupsLoading, setGroupsLoading] = useState(true)
 
   // Campos básicos
   const [name, setName] = useState('')
@@ -28,6 +30,22 @@ export default function NewMonitorPage() {
   const [followRedirects, setFollowRedirects] = useState(true)
   const [requestBody, setRequestBody] = useState('')
   const [headers, setHeaders] = useState<RequestHeader[]>([])
+  const [groupId, setGroupId] = useState<string | null>(null)
+
+  // Carregar grupos disponíveis
+  useEffect(() => {
+    async function loadGroups() {
+      try {
+        const data = await api.getGroups()
+        setGroups(data)
+      } catch {
+        // Ignora erro - grupos são opcionais
+      } finally {
+        setGroupsLoading(false)
+      }
+    }
+    loadGroups()
+  }, [])
 
   function addHeader() {
     setHeaders([...headers, { key: '', value: '' }])
@@ -66,6 +84,7 @@ export default function NewMonitorPage() {
         followRedirects,
         requestBody: requestBody.trim() || null,
         requestHeaders: validHeaders.length > 0 ? validHeaders : null,
+        groupId,
       })
 
       router.push('/monitors')
@@ -254,6 +273,30 @@ export default function NewMonitorPage() {
                 Enviar alertas quando o status mudar
               </label>
             </div>
+          </div>
+
+          {/* Grupo */}
+          <div>
+            <label htmlFor="groupId" className="block text-sm font-medium text-zinc-300 mb-2">
+              Grupo (opcional)
+            </label>
+            <select
+              id="groupId"
+              value={groupId || ''}
+              onChange={(e) => setGroupId(e.target.value || null)}
+              disabled={groupsLoading}
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors disabled:opacity-50"
+            >
+              <option value="">Sem grupo</option>
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-zinc-500 mt-1">
+              Organize monitores em grupos para melhor visualização
+            </p>
           </div>
         </div>
 

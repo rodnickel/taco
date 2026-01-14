@@ -73,12 +73,13 @@ services:
 
   worker:
     image: ghcr.io/rodnickel/taco-api:latest
-    entrypoint: ["node"]
-    command: ["dist/worker.js"]
+    entrypoint: ["./docker-entrypoint-worker.sh"]
+    command: []
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://taco:${POSTGRES_PASSWORD}@postgres:5432/taco
       - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
     networks:
       - network_public
     deploy:

@@ -32,6 +32,9 @@ export default function Home() {
               <a href="#status-pages" className="text-sm text-zinc-400 hover:text-white transition-colors">
                 Páginas de Status
               </a>
+              <Link href="/pricing" className="text-sm text-zinc-400 hover:text-white transition-colors">
+                Preços
+              </Link>
             </div>
 
             {/* Auth Buttons */}
@@ -74,6 +77,7 @@ export default function Home() {
               <a href="#monitoramento" className="block text-sm text-zinc-400 hover:text-white">Monitoramento</a>
               <a href="#alertas" className="block text-sm text-zinc-400 hover:text-white">Alertas</a>
               <a href="#status-pages" className="block text-sm text-zinc-400 hover:text-white">Páginas de Status</a>
+              <Link href="/pricing" className="block text-sm text-zinc-400 hover:text-white">Preços</Link>
               <div className="pt-4 border-t border-zinc-800 flex flex-col gap-3">
                 <Link href="/login" className="text-sm font-medium text-zinc-300 hover:text-white">
                   Entrar
@@ -640,6 +644,7 @@ export default function Home() {
               <a href="#monitoramento" className="hover:text-white transition-colors">Monitoramento</a>
               <a href="#alertas" className="hover:text-white transition-colors">Alertas</a>
               <a href="#status-pages" className="hover:text-white transition-colors">Páginas de Status</a>
+              <Link href="/pricing" className="hover:text-white transition-colors">Preços</Link>
             </div>
 
             <div className="text-sm text-zinc-500">

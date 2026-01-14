@@ -50,8 +50,10 @@ export function TeamProvider({ children }: TeamProviderProps) {
       const savedTeamId = api.getCurrentTeamId()
       let teamToSelect = teamsData.find((t) => t.id === savedTeamId)
 
-      // Se não encontrou o time salvo, usa o primeiro
+      // Se não encontrou o time salvo (ID inválido/antigo), limpa e usa o primeiro
       if (!teamToSelect) {
+        // Limpa o ID inválido do storage antes de selecionar novo time
+        localStorage.removeItem('currentTeamId')
         teamToSelect = teamsData[0]
       }
 

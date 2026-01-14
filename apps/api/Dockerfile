@@ -19,12 +19,13 @@ RUN npx prisma generate
 COPY apps/api/src ./src/
 COPY apps/api/tsconfig.json ./
 COPY apps/api/docker-entrypoint.sh ./
+COPY apps/api/docker-entrypoint-worker.sh ./
 
 # Build
 RUN npm run build
 
-# Make entrypoint executable
-RUN chmod +x docker-entrypoint.sh
+# Make entrypoints executable
+RUN chmod +x docker-entrypoint.sh docker-entrypoint-worker.sh
 
 EXPOSE 3333
 

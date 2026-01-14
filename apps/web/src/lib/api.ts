@@ -77,6 +77,13 @@ async function request<T>(
   const data = await response.json()
 
   if (!response.ok) {
+    // Se o erro for de autenticação ou autorização, limpa o storage
+    if (response.status === 401 || response.status === 403) {
+      // Limpa teamId inválido para evitar loop de erros
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('currentTeamId')
+      }
+    }
     throw data as ApiError
   }
 

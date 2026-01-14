@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as api from '@/lib/api'
-import type { ApiError, RequestHeader } from '@/lib/api'
+import type { ApiError, RequestHeader, MonitorGroup } from '@/lib/api'
 
 export default function EditMonitorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -13,6 +13,8 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [groups, setGroups] = useState<MonitorGroup[]>([])
+  const [groupsLoading, setGroupsLoading] = useState(true)
 
   // Campos básicos
   const [name, setName] = useState('')
@@ -31,10 +33,23 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
   const [followRedirects, setFollowRedirects] = useState(true)
   const [requestBody, setRequestBody] = useState('')
   const [headers, setHeaders] = useState<RequestHeader[]>([])
+  const [groupId, setGroupId] = useState<string | null>(null)
 
   useEffect(() => {
     loadMonitor()
+    loadGroups()
   }, [id])
+
+  async function loadGroups() {
+    try {
+      const data = await api.getGroups()
+      setGroups(data)
+    } catch {
+      // Ignora erro - grupos são opcionais
+    } finally {
+      setGroupsLoading(false)
+    }
+  }
 
   function addHeader() {
     setHeaders([...headers, { key: '', value: '' }])
@@ -68,6 +83,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
       setFollowRedirects(monitor.followRedirects ?? true)
       setRequestBody(monitor.requestBody || '')
       setHeaders(monitor.requestHeaders || [])
+      setGroupId(monitor.groupId || null)
       // Abre a seção avançada se houver configurações personalizadas
       if (monitor.requestBody || (monitor.requestHeaders && monitor.requestHeaders.length > 0) || monitor.confirmationPeriod > 0) {
         setShowAdvanced(true)
@@ -108,6 +124,7 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
         followRedirects,
         requestBody: requestBody.trim() || null,
         requestHeaders: validHeaders.length > 0 ? validHeaders : null,
+        groupId,
       })
 
       router.push(`/monitors/${id}`)
@@ -318,6 +335,30 @@ export default function EditMonitorPage({ params }: { params: Promise<{ id: stri
                 Enviar alertas quando o status mudar
               </label>
             </div>
+          </div>
+
+          {/* Grupo */}
+          <div>
+            <label htmlFor="groupId" className="block text-sm font-medium text-zinc-300 mb-2">
+              Grupo (opcional)
+            </label>
+            <select
+              id="groupId"
+              value={groupId || ''}
+              onChange={(e) => setGroupId(e.target.value || null)}
+              disabled={groupsLoading}
+              className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors disabled:opacity-50"
+            >
+              <option value="">Sem grupo</option>
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-zinc-500 mt-1">
+              Organize monitores em grupos para melhor visualização
+            </p>
           </div>
         </div>
 

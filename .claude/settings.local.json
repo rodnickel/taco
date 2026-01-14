@@ -101,7 +101,8 @@
       "Bash(git push:*)",
       "Bash(pnpm --filter @taco/api exec tsc:*)",
       "Bash(pnpm --filter @taco/web exec tsc:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git fetch:*)"
     ]
   }
 }
