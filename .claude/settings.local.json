@@ -102,7 +102,12 @@
       "Bash(pnpm --filter @taco/api exec tsc:*)",
       "Bash(pnpm --filter @taco/web exec tsc:*)",
       "Bash(curl:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(npm run db:migrate:*)",
+      "Bash(npm run db:push:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker cp:*)"
     ]
   }
 }

@@ -18,10 +18,10 @@ Este documento detalha as tarefas necessárias para implementar o sistema de pla
 
 ---
 
-## Fase 1: Estrutura do Banco de Dados
+## Fase 1: Estrutura do Banco de Dados ✅
 
 ### 1.1 Modelo de Plano (Plan)
-- [ ] Criar modelo `Plan` no Prisma schema
+- [x] Criar modelo `Plan` no Prisma schema
   - id, name, slug (free, starter, pro, business)
   - price (em centavos)
   - maxMonitors, minIntervalSeconds, historyDays
@@ -30,46 +30,46 @@ Este documento detalha as tarefas necessárias para implementar o sistema de pla
   - isActive, createdAt, updatedAt
 
 ### 1.2 Modelo de Assinatura (Subscription)
-- [ ] Criar modelo `Subscription` no Prisma schema
+- [x] Criar modelo `Subscription` no Prisma schema
   - id, teamId (relação com Team)
   - planId (relação com Plan)
   - status (active, canceled, past_due, trialing)
   - currentPeriodStart, currentPeriodEnd
   - cancelAtPeriodEnd
-  - stripeCustomerId, stripeSubscriptionId (para integração futura)
+  - externalCustomerId, externalSubscriptionId (para integração futura)
   - createdAt, updatedAt
 
 ### 1.3 Atualizar modelo Team
-- [ ] Adicionar relação com Subscription
-- [ ] Campo `subscriptionId` opcional
+- [x] Adicionar relação com Subscription
+- [x] Campo `subscription` opcional (1:1)
 
 ### 1.4 Seed dos Planos
-- [ ] Criar seed para popular os 4 planos no banco
-- [ ] Executar migration e seed
+- [x] Criar seed para popular os 4 planos no banco
+- [x] Executar migration e seed
 
 ---
 
-## Fase 2: Backend - Serviço de Limites
+## Fase 2: Backend - Serviço de Limites ✅
 
 ### 2.1 Serviço de Planos (plans.service.ts)
-- [ ] Criar módulo `plans` na API
-- [ ] Função `getPlanBySlug(slug)`
-- [ ] Função `getAllPlans()`
-- [ ] Função `getTeamPlan(teamId)` - retorna plano atual do time
+- [x] Criar módulo `plans` na API
+- [x] Função `getPlanBySlug(slug)`
+- [x] Função `getAllPlans()`
+- [x] Função `getTeamPlan(teamId)` - retorna plano atual do time
 
 ### 2.2 Serviço de Limites (limits.service.ts)
-- [ ] Criar serviço de verificação de limites
-- [ ] `checkMonitorLimit(teamId)` - verifica se pode criar mais monitores
-- [ ] `checkStatusPageLimit(teamId)` - verifica se pode criar mais status pages
-- [ ] `checkTeamMemberLimit(teamId)` - verifica se pode adicionar membros
-- [ ] `getMinInterval(teamId)` - retorna intervalo mínimo permitido
-- [ ] `getAllowedChannels(teamId)` - retorna canais de alerta permitidos
-- [ ] `getHistoryDays(teamId)` - retorna dias de histórico
+- [x] Criar serviço de verificação de limites
+- [x] `checkMonitorLimit(teamId)` - verifica se pode criar mais monitores
+- [x] `checkStatusPageLimit(teamId)` - verifica se pode criar mais status pages
+- [x] `checkTeamMemberLimit(teamId)` - verifica se pode adicionar membros
+- [x] `getMinInterval(teamId)` - retorna intervalo mínimo permitido
+- [x] `getAllowedChannels(teamId)` - retorna canais de alerta permitidos
+- [x] `getHistoryDays(teamId)` - retorna dias de histórico
 
 ### 2.3 Endpoints de Planos
-- [ ] GET `/api/plans` - lista todos os planos
-- [ ] GET `/api/teams/:id/subscription` - retorna assinatura atual do time
-- [ ] GET `/api/teams/:id/usage` - retorna uso atual vs limites
+- [x] GET `/api/plans` - lista todos os planos
+- [x] GET `/api/teams/:id/subscription` - retorna assinatura atual do time
+- [x] GET `/api/teams/:id/usage` - retorna uso atual vs limites
 
 ---
 

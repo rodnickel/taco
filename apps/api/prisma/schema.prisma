@@ -20,6 +20,82 @@ enum TeamRole {
 }
 
 // ============================================
+// ENUM: Status da Assinatura
+// ============================================
+enum SubscriptionStatus {
+  ACTIVE    // Assinatura ativa
+  CANCELED  // Cancelada (ainda pode ter acesso até o fim do período)
+  PAST_DUE  // Pagamento atrasado
+  TRIALING  // Período de teste
+}
+
+// ============================================
+// MODELO: Plan (Plano de assinatura)
+// ============================================
+model Plan {
+  id   String @id @default(cuid())
+  name String // Free, Starter, Pro, Business
+  slug String @unique // free, starter, pro, business
+
+  // Preço em centavos (ex: 2900 = R$29,00)
+  price Int @default(0)
+
+  // Limites do plano
+  maxMonitors        Int @default(3) @map("max_monitors") // -1 = ilimitado
+  minIntervalSeconds Int @default(300) @map("min_interval_seconds") // 5 min = 300s
+  historyDays        Int @default(7) @map("history_days") // Dias de histórico
+  maxStatusPages     Int @default(1) @map("max_status_pages") // -1 = ilimitado
+  maxTeamMembers     Int @default(1) @map("max_team_members") // -1 = ilimitado
+
+  // Canais de alerta permitidos (JSON array: ["email", "telegram", "webhook", "whatsapp"])
+  allowedChannels Json @default("[\"email\"]") @map("allowed_channels")
+
+  // Status do plano
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relacionamentos
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+// ============================================
+// MODELO: Subscription (Assinatura do time)
+// ============================================
+model Subscription {
+  id String @id @default(cuid())
+
+  // Status da assinatura
+  status SubscriptionStatus @default(ACTIVE)
+
+  // Período atual
+  currentPeriodStart DateTime  @default(now()) @map("current_period_start")
+  currentPeriodEnd   DateTime? @map("current_period_end")
+  cancelAtPeriodEnd  Boolean   @default(false) @map("cancel_at_period_end")
+
+  // Integração com gateway de pagamento (futuro)
+  externalCustomerId     String? @map("external_customer_id") // ID do cliente no Asaas/Stripe
+  externalSubscriptionId String? @map("external_subscription_id") // ID da assinatura no gateway
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relacionamento com Plan
+  planId String @map("plan_id")
+  plan   Plan   @relation(fields: [planId], references: [id])
+
+  // Relacionamento com Team (1:1)
+  teamId String @unique @map("team_id")
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+// ============================================
 // MODELO: User (Usuário do sistema)
 // ============================================
 model User {
@@ -65,6 +141,7 @@ model Team {
   incidents          Incident[]
   escalationPolicies EscalationPolicy[]
   maintenanceWindows MaintenanceWindow[]
+  subscription       Subscription?
 
   @@index([ownerId])
   @@map("teams")
