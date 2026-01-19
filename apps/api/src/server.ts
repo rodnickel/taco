@@ -55,9 +55,12 @@ async function registerPlugins() {
     credentials: true,
   })
 
-  // Valida que JWT_SECRET existe (obrigatório para a API)
+  // Valida que JWT_SECRET existe e tem tamanho adequado (obrigatório para a API)
   if (!env.JWT_SECRET) {
     throw new Error('JWT_SECRET is required for API server')
+  }
+  if (env.JWT_SECRET.length < 32) {
+    throw new Error('JWT_SECRET must be at least 32 characters long')
   }
 
   // JWT - autenticação
