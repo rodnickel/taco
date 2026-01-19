@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import * as plansService from './plans.service.js'
+import { verifyTeamMembership } from '../../lib/team-auth.js'
 
 // ============================================
 // Rotas de Planos
@@ -71,9 +72,14 @@ export async function subscriptionRoutes(app: FastifyInstance) {
     const { teamId } = request.params
 
     // Verifica se o usuário tem acesso ao time
-    const hasAccess = await request.verifyTeamAccess(teamId)
-    if (!hasAccess) {
-      return reply.status(403).send({ error: 'Sem permissão para acessar este time' })
+    const userId = request.user?.sub
+    if (!userId) {
+      return reply.status(401).send({ error: 'Não autenticado' })
+    }
+
+    const verification = await verifyTeamMembership(userId, teamId)
+    if (!verification.valid) {
+      return reply.status(403).send({ error: verification.error || 'Sem permissão para acessar este time' })
     }
 
     const subscription = await plansService.getTeamSubscription(teamId)
@@ -109,9 +115,14 @@ export async function subscriptionRoutes(app: FastifyInstance) {
     const { teamId } = request.params
 
     // Verifica se o usuário tem acesso ao time
-    const hasAccess = await request.verifyTeamAccess(teamId)
-    if (!hasAccess) {
-      return reply.status(403).send({ error: 'Sem permissão para acessar este time' })
+    const userId = request.user?.sub
+    if (!userId) {
+      return reply.status(401).send({ error: 'Não autenticado' })
+    }
+
+    const verification = await verifyTeamMembership(userId, teamId)
+    if (!verification.valid) {
+      return reply.status(403).send({ error: verification.error || 'Sem permissão para acessar este time' })
     }
 
     const usageWithLimits = await plansService.getTeamUsageWithLimits(teamId)
