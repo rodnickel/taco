@@ -17,7 +17,7 @@ export default function NewStatusPagePage() {
 
   // Verifica se atingiu o limite de status pages
   const limitReached = usage && !usage.usage.statusPages.unlimited &&
-    usage.usage.statusPages.current >= usage.usage.statusPages.limit
+    usage.usage.statusPages.current >= usage.usage.statusPages.limit || false
 
   // Form fields
   const [name, setName] = useState('')
