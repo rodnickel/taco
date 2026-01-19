@@ -51,8 +51,11 @@ app.addHook('onError', async (request, reply, error) => {
 async function registerPlugins() {
   // CORS - permite requisições do frontend
   await app.register(cors, {
-    origin: true, // Aceita qualquer origem em desenvolvimento
+    origin: true, // Aceita qualquer origem
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Team-Id'],
+    exposedHeaders: ['Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   })
 
   // Valida que JWT_SECRET existe e tem tamanho adequado (obrigatório para a API)
