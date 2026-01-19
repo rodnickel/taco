@@ -5,14 +5,23 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as api from '@/lib/api'
 import type { ApiError, RequestHeader, MonitorGroup } from '@/lib/api'
+import { useTeam } from '@/contexts/TeamContext'
 
 export default function NewMonitorPage() {
   const router = useRouter()
+  const { usage, refreshUsage } = useTeam()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [groups, setGroups] = useState<MonitorGroup[]>([])
   const [groupsLoading, setGroupsLoading] = useState(true)
+
+  // Verifica se atingiu o limite de monitores
+  const monitorLimitReached = usage?.usage.monitors && !usage.usage.monitors.unlimited &&
+    usage.usage.monitors.current >= usage.usage.monitors.limit
+
+  // Intervalo mínimo permitido pelo plano
+  const minIntervalSeconds = usage?.limits.minIntervalSeconds ?? 300
 
   // Campos básicos
   const [name, setName] = useState('')
@@ -46,6 +55,13 @@ export default function NewMonitorPage() {
     }
     loadGroups()
   }, [])
+
+  // Ajusta o intervalo inicial baseado no plano
+  useEffect(() => {
+    if (minIntervalSeconds > intervalSeconds) {
+      setIntervalSeconds(minIntervalSeconds)
+    }
+  }, [minIntervalSeconds])
 
   function addHeader() {
     setHeaders([...headers, { key: '', value: '' }])
@@ -87,6 +103,9 @@ export default function NewMonitorPage() {
         groupId,
       })
 
+      // Atualiza o uso após criar
+      refreshUsage()
+
       router.push('/monitors')
     } catch (err) {
       const apiError = err as ApiError
@@ -120,6 +139,25 @@ export default function NewMonitorPage() {
         <h1 className="text-2xl font-bold text-white">Novo Monitor</h1>
         <p className="text-zinc-400 mt-1">Configure um novo monitor de uptime</p>
       </div>
+
+      {/* Alerta de limite atingido */}
+      {monitorLimitReached && (
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 flex items-start gap-3">
+          <svg className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+          <div>
+            <p className="text-yellow-400 font-medium">Limite de monitores atingido</p>
+            <p className="text-yellow-400/80 text-sm mt-1">
+              Você atingiu o limite de {usage?.usage.monitors.limit} monitores do plano {usage?.plan.name}.{' '}
+              <Link href="/pricing" className="underline hover:text-yellow-300">
+                Faça upgrade
+              </Link>
+              {' '}para criar mais monitores.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -216,15 +254,20 @@ export default function NewMonitorPage() {
                 onChange={(e) => setIntervalSeconds(Number(e.target.value))}
                 className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-colors"
               >
-                <option value={30}>30 segundos</option>
-                <option value={60}>1 minuto</option>
-                <option value={180}>3 minutos</option>
-                <option value={300}>5 minutos</option>
+                {minIntervalSeconds <= 30 && <option value={30}>30 segundos</option>}
+                {minIntervalSeconds <= 60 && <option value={60}>1 minuto</option>}
+                {minIntervalSeconds <= 180 && <option value={180}>3 minutos</option>}
+                {minIntervalSeconds <= 300 && <option value={300}>5 minutos</option>}
                 <option value={600}>10 minutos</option>
                 <option value={900}>15 minutos</option>
                 <option value={1800}>30 minutos</option>
                 <option value={3600}>1 hora</option>
               </select>
+              {minIntervalSeconds > 60 && (
+                <p className="text-xs text-zinc-500 mt-1">
+                  Intervalos menores disponíveis no plano Pro ou Business
+                </p>
+              )}
             </div>
 
             <div>
@@ -459,7 +502,7 @@ export default function NewMonitorPage() {
           </Link>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || monitorLimitReached}
             className="px-6 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
           >
             {loading ? (
@@ -467,6 +510,8 @@ export default function NewMonitorPage() {
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Criando...
               </>
+            ) : monitorLimitReached ? (
+              'Limite atingido'
             ) : (
               'Criar Monitor'
             )}

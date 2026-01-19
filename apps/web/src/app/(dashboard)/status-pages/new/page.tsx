@@ -5,13 +5,19 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import * as api from '@/lib/api'
 import type { ApiError, Monitor } from '@/lib/api'
+import { useTeam } from '@/contexts/TeamContext'
 
 export default function NewStatusPagePage() {
   const router = useRouter()
+  const { usage, loading: usageLoading } = useTeam()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [monitors, setMonitors] = useState<Monitor[]>([])
   const [loadingMonitors, setLoadingMonitors] = useState(true)
+
+  // Verifica se atingiu o limite de status pages
+  const limitReached = usage && !usage.usage.statusPages.unlimited &&
+    usage.usage.statusPages.current >= usage.usage.statusPages.limit
 
   // Form fields
   const [name, setName] = useState('')
@@ -149,6 +155,33 @@ export default function NewStatusPagePage() {
         <h1 className="text-2xl font-bold text-white">Nova Status Page</h1>
         <p className="text-zinc-400 mt-1">Crie uma página pública de status para seus serviços</p>
       </div>
+
+      {/* Limite atingido */}
+      {limitReached && (
+        <div className="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <div className="flex-1">
+              <h3 className="text-amber-400 font-medium">Limite de status pages atingido</h3>
+              <p className="text-amber-400/80 text-sm mt-1">
+                Você atingiu o limite de {usage?.usage.statusPages.limit} status page{usage?.usage.statusPages.limit !== 1 ? 's' : ''} do plano {usage?.plan.name}.
+                Faça upgrade para criar mais páginas.
+              </p>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-1 mt-3 text-sm text-amber-400 hover:text-amber-300 font-medium"
+              >
+                Ver planos
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -428,7 +461,7 @@ export default function NewStatusPagePage() {
           </Link>
           <button
             type="submit"
-            disabled={loading || !!slugError}
+            disabled={loading || !!slugError || limitReached}
             className="px-6 py-2.5 bg-orange-600 hover:bg-orange-500 disabled:bg-orange-600/50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2"
           >
             {loading ? (
@@ -436,6 +469,8 @@ export default function NewStatusPagePage() {
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Criando...
               </>
+            ) : limitReached ? (
+              'Limite atingido'
             ) : (
               'Criar Status Page'
             )}

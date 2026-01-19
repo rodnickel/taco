@@ -1,4 +1,5 @@
 import { prisma } from '../../lib/prisma.js'
+import { checkStatusPageLimit } from '../plans/limits.service.js'
 import type {
   CreateStatusPageInput,
   UpdateStatusPageInput,
@@ -41,6 +42,12 @@ export async function createStatusPage(
   teamId: string,
   data: CreateStatusPageInput
 ): Promise<StatusPageWithMonitors> {
+  // Verifica limite de status pages do plano
+  const limitCheck = await checkStatusPageLimit(teamId)
+  if (!limitCheck.allowed) {
+    throw new Error(limitCheck.message || 'Limite de status pages atingido')
+  }
+
   const { monitorIds, ...statusPageData } = data
 
   const statusPage = await prisma.statusPage.create({

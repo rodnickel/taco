@@ -1,5 +1,6 @@
 import { prisma } from '../../lib/prisma.js'
 import { sendNotification } from '../../services/notification.service.js'
+import { checkChannelAllowed } from '../plans/limits.service.js'
 import type {
   CreateAlertChannelInput,
   UpdateAlertChannelInput,
@@ -17,6 +18,12 @@ import type {
 // ============================================
 
 export async function createAlertChannel(teamId: string, data: CreateAlertChannelInput) {
+  // Verifica se o tipo de canal é permitido pelo plano
+  const channelCheck = await checkChannelAllowed(teamId, data.type)
+  if (!channelCheck.allowed) {
+    throw new Error(channelCheck.message || `Canal "${data.type}" não disponível no seu plano`)
+  }
+
   const channel = await prisma.alertChannel.create({
     data: {
       name: data.name,

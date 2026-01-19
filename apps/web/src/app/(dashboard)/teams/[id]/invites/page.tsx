@@ -5,13 +5,18 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import * as api from '@/lib/api'
 import type { Team, TeamInvite, TeamRole, ApiError } from '@/lib/api'
-import { useTeamPermission } from '@/contexts/TeamContext'
+import { useTeamPermission, useTeam } from '@/contexts/TeamContext'
 import { ConfirmModal } from '@/components/ConfirmModal'
 
 export default function TeamInvitesPage() {
   const params = useParams()
   const teamId = params.id as string
   const { canAdmin } = useTeamPermission()
+  const { usage } = useTeam()
+
+  // Verifica se atingiu o limite de membros
+  const memberLimitReached = usage && !usage.usage.members.unlimited &&
+    usage.usage.members.current >= usage.usage.members.limit
 
   const [team, setTeam] = useState<Team | null>(null)
   const [invites, setInvites] = useState<TeamInvite[]>([])
@@ -177,7 +182,7 @@ export default function TeamInvitesPage() {
           <h1 className="text-2xl font-bold text-white">Convites</h1>
           <p className="text-zinc-400 mt-1">Gerencie os convites do time {team.name}</p>
         </div>
-        {!showForm && (
+        {!showForm && !memberLimitReached && (
           <button
             onClick={() => setShowForm(true)}
             className="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-lg transition-colors"
@@ -189,6 +194,33 @@ export default function TeamInvitesPage() {
           </button>
         )}
       </div>
+
+      {/* Limite de membros atingido */}
+      {memberLimitReached && (
+        <div className="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <div className="flex-1">
+              <h3 className="text-amber-400 font-medium">Limite de membros atingido</h3>
+              <p className="text-amber-400/80 text-sm mt-1">
+                Você atingiu o limite de {usage?.usage.members.limit} membro{usage?.usage.members.limit !== 1 ? 's' : ''} do plano {usage?.plan.name}.
+                Faça upgrade para convidar mais pessoas.
+              </p>
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-1 mt-3 text-sm text-amber-400 hover:text-amber-300 font-medium"
+              >
+                Ver planos
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation Tabs */}
       <div className="flex gap-4 mb-8 border-b border-zinc-800">

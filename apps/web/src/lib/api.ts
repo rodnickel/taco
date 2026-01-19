@@ -1022,3 +1022,74 @@ export async function removeMonitorsFromGroup(groupId: string, monitorIds: strin
     body: JSON.stringify({ monitorIds }),
   })
 }
+
+// ============================================
+// Tipos de Planos e Assinaturas
+// ============================================
+
+export interface Plan {
+  id: string
+  name: string
+  slug: 'free' | 'starter' | 'pro' | 'business'
+  price: number // em centavos
+  maxMonitors: number // -1 = ilimitado
+  minIntervalSeconds: number
+  historyDays: number
+  maxStatusPages: number // -1 = ilimitado
+  maxTeamMembers: number // -1 = ilimitado
+  allowedChannels: string[]
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Subscription {
+  id: string
+  status: 'ACTIVE' | 'CANCELED' | 'PAST_DUE' | 'TRIALING'
+  currentPeriodStart: string
+  currentPeriodEnd: string | null
+  cancelAtPeriodEnd: boolean
+  plan: Plan
+  createdAt: string
+  updatedAt: string
+}
+
+export interface UsageInfo {
+  current: number
+  limit: number
+  unlimited: boolean
+}
+
+export interface TeamUsage {
+  plan: {
+    id: string
+    name: string
+    slug: string
+  }
+  usage: {
+    monitors: UsageInfo
+    statusPages: UsageInfo
+    members: UsageInfo
+  }
+  limits: {
+    minIntervalSeconds: number
+    historyDays: number
+    allowedChannels: string[]
+  }
+}
+
+// ============================================
+// Funções de Planos e Assinaturas
+// ============================================
+
+export async function getPlans() {
+  return request<Plan[]>('/plans')
+}
+
+export async function getTeamSubscription(teamId: string) {
+  return request<Subscription>(`/teams/${teamId}/subscription`)
+}
+
+export async function getTeamUsage(teamId: string) {
+  return request<TeamUsage>(`/teams/${teamId}/usage`)
+}

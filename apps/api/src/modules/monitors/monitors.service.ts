@@ -3,6 +3,11 @@ import {
   scheduleMonitorCheck,
   unscheduleMonitorCheck,
 } from '../../workers/monitor-check.worker.js'
+import {
+  checkMonitorLimit,
+  checkIntervalAllowed,
+  getHistoryDays,
+} from '../plans/limits.service.js'
 import type {
   CreateMonitorInput,
   UpdateMonitorInput,
@@ -17,6 +22,18 @@ import type {
 // ============================================
 
 export async function createMonitor(teamId: string, data: CreateMonitorInput) {
+  // Verifica limite de monitores do plano
+  const limitCheck = await checkMonitorLimit(teamId)
+  if (!limitCheck.allowed) {
+    throw new Error(limitCheck.message || 'Limite de monitores atingido')
+  }
+
+  // Verifica se o intervalo é permitido pelo plano
+  const intervalCheck = await checkIntervalAllowed(teamId, data.intervalSeconds)
+  if (!intervalCheck.allowed) {
+    throw new Error(intervalCheck.message || `Intervalo mínimo permitido: ${intervalCheck.minInterval}s`)
+  }
+
   // Converte requestHeaders para formato JSON aceito pelo Prisma
   const { requestHeaders, escalationPolicyId, groupId, ...restData } = data
   const monitor = await prisma.monitor.create({
@@ -84,6 +101,14 @@ export async function updateMonitor(
     return null
   }
 
+  // Verifica se o novo intervalo é permitido pelo plano
+  if (data.intervalSeconds !== undefined) {
+    const intervalCheck = await checkIntervalAllowed(teamId, data.intervalSeconds)
+    if (!intervalCheck.allowed) {
+      throw new Error(intervalCheck.message || `Intervalo mínimo permitido: ${intervalCheck.minInterval}s`)
+    }
+  }
+
   // Converte requestHeaders, escalationPolicyId e groupId para formato Prisma
   const { requestHeaders, escalationPolicyId, groupId, ...restData } = data
   const updateData: Record<string, unknown> = { ...restData }
@@ -139,12 +164,20 @@ export async function getMonitorWithStatus(
   teamId: string,
   id: string
 ): Promise<MonitorWithStatus | null> {
+  // Obtém o limite de dias de histórico do plano para calcular uptime
+  const historyDays = await getHistoryDays(teamId)
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - historyDays)
+  startDate.setHours(0, 0, 0, 0)
+
   const monitor = await prisma.monitor.findFirst({
     where: { id, teamId },
     include: {
       checks: {
+        where: {
+          checkedAt: { gte: startDate },
+        },
         orderBy: { checkedAt: 'desc' },
-        take: 100, // Últimos 100 checks para calcular uptime
       },
     },
   })
@@ -153,7 +186,7 @@ export async function getMonitorWithStatus(
     return null
   }
 
-  // Calcula o status atual baseado nos últimos checks
+  // Calcula o status atual baseado no último check
   const lastCheck = monitor.checks[0]
   let currentStatus: 'up' | 'down' | 'degraded' | 'unknown' = 'unknown'
 
@@ -170,7 +203,7 @@ export async function getMonitorWithStatus(
     }
   }
 
-  // Calcula uptime percentage
+  // Calcula uptime percentage baseado no período do plano
   const totalChecks = monitor.checks.length
   const upChecks = monitor.checks.filter((c) => c.status === 'up').length
   const uptimePercentage = totalChecks > 0 ? (upChecks / totalChecks) * 100 : undefined
@@ -192,6 +225,12 @@ export async function findAllMonitorsWithStatus(
   teamId: string,
   query: ListMonitorsQuery
 ): Promise<{ monitors: MonitorWithStatus[]; total: number; limit: number; offset: number }> {
+  // Obtém o limite de dias de histórico do plano para calcular uptime
+  const historyDays = await getHistoryDays(teamId)
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - historyDays)
+  startDate.setHours(0, 0, 0, 0)
+
   const where: { teamId: string; active?: boolean } = { teamId }
 
   if (query.active !== undefined) {
@@ -206,8 +245,10 @@ export async function findAllMonitorsWithStatus(
       skip: query.offset,
       include: {
         checks: {
+          where: {
+            checkedAt: { gte: startDate },
+          },
           orderBy: { checkedAt: 'desc' },
-          take: 100,
         },
       },
     }),
@@ -268,7 +309,7 @@ export interface DailyUptimeData {
 export async function getMonitorHistory(
   teamId: string,
   monitorId: string,
-  days: number = 90
+  days?: number
 ): Promise<DailyUptimeData[] | null> {
   // Verifica se o monitor pertence ao time
   const monitor = await prisma.monitor.findFirst({
@@ -279,9 +320,15 @@ export async function getMonitorHistory(
     return null
   }
 
+  // Obtém o limite de dias de histórico do plano
+  const maxHistoryDays = await getHistoryDays(teamId)
+
+  // Usa o menor valor entre o solicitado e o permitido pelo plano
+  const effectiveDays = days ? Math.min(days, maxHistoryDays) : maxHistoryDays
+
   // Data de início (X dias atrás)
   const startDate = new Date()
-  startDate.setDate(startDate.getDate() - days)
+  startDate.setDate(startDate.getDate() - effectiveDays)
   startDate.setHours(0, 0, 0, 0)
 
   // Busca todos os checks do período
@@ -312,9 +359,9 @@ export async function getMonitorHistory(
   }
 
   // Inicializa todos os dias do período
-  for (let i = 0; i < days; i++) {
+  for (let i = 0; i < effectiveDays; i++) {
     const date = new Date()
-    date.setDate(date.getDate() - (days - 1 - i))
+    date.setDate(date.getDate() - (effectiveDays - 1 - i))
     const dateKey = formatDateLocal(date)
     dailyData.set(dateKey, { up: 0, down: 0, latencies: [] })
   }

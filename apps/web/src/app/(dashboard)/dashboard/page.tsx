@@ -7,6 +7,22 @@ import * as api from '@/lib/api'
 import type { Monitor } from '@/lib/api'
 import { useTeam } from '@/contexts/TeamContext'
 
+// Cores dos planos
+const planColors: Record<string, string> = {
+  free: 'bg-zinc-500/20 text-zinc-400 border-zinc-500/30',
+  starter: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  pro: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  business: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+}
+
+function PlanBadge({ planSlug, planName }: { planSlug: string; planName: string }) {
+  return (
+    <span className={`px-2 py-0.5 text-xs font-medium rounded-md border ${planColors[planSlug] || planColors.free}`}>
+      {planName}
+    </span>
+  )
+}
+
 function StatusDot({ status }: { status: Monitor['currentStatus'] }) {
   const colors = {
     up: 'bg-emerald-500',
@@ -44,7 +60,7 @@ function StatusBadge({ status }: { status: Monitor['currentStatus'] }) {
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { currentTeam, loading: teamLoading } = useTeam()
+  const { currentTeam, loading: teamLoading, usage } = useTeam()
   const [monitors, setMonitors] = useState<Monitor[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -94,9 +110,27 @@ export default function DashboardPage() {
   return (
     <div className="p-8">
       {/* Page header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <p className="text-zinc-400 mt-1">Visão geral dos seus serviços</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+            {usage && (
+              <PlanBadge planSlug={usage.plan.slug} planName={usage.plan.name} />
+            )}
+          </div>
+          <p className="text-zinc-400 mt-1">Visão geral dos seus serviços</p>
+        </div>
+        {usage && usage.plan.slug === 'free' && (
+          <Link
+            href="/pricing"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white text-sm font-medium rounded-lg transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
+            </svg>
+            Fazer Upgrade
+          </Link>
+        )}
       </div>
 
       {/* Stats grid */}
@@ -110,7 +144,28 @@ export default function DashboardPage() {
               </svg>
             </div>
           </div>
-          <div className="text-3xl font-bold text-white">{stats.total}</div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-bold text-white">{stats.total}</span>
+            {usage && !usage.usage.monitors.unlimited && (
+              <span className="text-sm text-zinc-500">/ {usage.usage.monitors.limit}</span>
+            )}
+          </div>
+          {usage && !usage.usage.monitors.unlimited && (
+            <div className="mt-2">
+              <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    usage.usage.monitors.current >= usage.usage.monitors.limit
+                      ? 'bg-red-500'
+                      : usage.usage.monitors.current >= usage.usage.monitors.limit * 0.8
+                      ? 'bg-amber-500'
+                      : 'bg-emerald-500'
+                  }`}
+                  style={{ width: `${Math.min(100, (usage.usage.monitors.current / usage.usage.monitors.limit) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="stat-card">

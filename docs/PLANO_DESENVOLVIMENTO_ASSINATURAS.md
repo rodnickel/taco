@@ -73,53 +73,58 @@ Este documento detalha as tarefas necessárias para implementar o sistema de pla
 
 ---
 
-## Fase 3: Backend - Aplicar Limites
+## Fase 3: Backend - Aplicar Limites ✅
 
 ### 3.1 Monitores
-- [ ] Validar limite de monitores ao criar (monitors.service.ts)
-- [ ] Validar intervalo mínimo ao criar/editar monitor
-- [ ] Retornar erro claro quando limite atingido
+- [x] Validar limite de monitores ao criar (monitors.service.ts)
+- [x] Validar intervalo mínimo ao criar/editar monitor
+- [x] Retornar erro claro quando limite atingido
 
 ### 3.2 Status Pages
-- [ ] Validar limite de status pages ao criar (status-pages.service.ts)
-- [ ] Retornar erro claro quando limite atingido
+- [x] Validar limite de status pages ao criar (status-pages.service.ts)
+- [x] Retornar erro claro quando limite atingido
 
 ### 3.3 Membros do Time
-- [ ] Validar limite de membros ao convidar (teams.service.ts)
-- [ ] Retornar erro claro quando limite atingido
+- [x] Validar limite de membros ao convidar (teams.service.ts)
+- [x] Validar limite de membros ao aceitar convite
+- [x] Retornar erro claro quando limite atingido
 
 ### 3.4 Canais de Alerta
-- [ ] Validar canal permitido ao criar alert channel (alerts.service.ts)
-- [ ] Filtrar canais disponíveis baseado no plano
-- [ ] Retornar erro claro quando canal não permitido
+- [x] Validar canal permitido ao criar alert channel (alerts.service.ts)
+- [x] Filtrar canais disponíveis baseado no plano (frontend)
+- [x] Retornar erro claro quando canal não permitido
 
 ### 3.5 Histórico
-- [ ] Aplicar filtro de data nas queries de checks/incidents
-- [ ] Limitar dados retornados ao período do plano
+- [x] Aplicar filtro de data nas queries de checks (getMonitorHistory)
+- [x] Limitar dados retornados ao período do plano
 
 ---
 
-## Fase 4: Frontend - Exibição de Limites
+## Fase 4: Frontend - Exibição de Limites ✅
 
 ### 4.1 Dashboard
-- [ ] Exibir uso atual (X de Y monitores, etc)
-- [ ] Badge do plano atual
-- [ ] Botão de upgrade quando próximo do limite
+- [x] Exibir uso atual (X de Y monitores, etc)
+- [x] Badge do plano atual
+- [x] Botão de upgrade quando próximo do limite
 
 ### 4.2 Criação de Recursos
-- [ ] Mostrar aviso quando limite atingido
-- [ ] Desabilitar botão de criar com mensagem de upgrade
-- [ ] Mostrar intervalos disponíveis baseado no plano
+- [x] Mostrar aviso quando limite atingido (monitores)
+- [x] Desabilitar botão de criar com mensagem de upgrade
+- [x] Mostrar intervalos disponíveis baseado no plano
+- [x] TeamContext com estado de usage
+- [x] Funções de API para planos e assinaturas (api.ts)
+- [x] Aplicar mesma lógica para status pages
+- [x] Aplicar mesma lógica para membros do time
 
 ### 4.3 Canais de Alerta
-- [ ] Mostrar canais disponíveis vs bloqueados
-- [ ] Badge "Pro" nos canais premium (WhatsApp)
-- [ ] CTA de upgrade ao clicar em canal bloqueado
+- [x] Mostrar canais disponíveis vs bloqueados
+- [x] Badge "Pro" nos canais premium (WhatsApp)
+- [x] CTA de upgrade ao clicar em canal bloqueado
 
 ### 4.4 Página de Configurações do Time
-- [ ] Seção "Plano Atual" com detalhes
-- [ ] Uso atual de cada recurso (barra de progresso)
-- [ ] Botão de gerenciar assinatura
+- [x] Seção "Plano Atual" com detalhes
+- [x] Uso atual de cada recurso (barra de progresso)
+- [x] Botão de gerenciar assinatura
 - [ ] Histórico de faturas (futuro)
 
 ---
@@ -139,14 +144,14 @@ Este documento detalha as tarefas necessárias para implementar o sistema de pla
 
 ---
 
-## Fase 6: Assinatura Padrão
+## Fase 6: Assinatura Padrão ✅
 
 ### 6.1 Auto-atribuição do Plano Free
-- [ ] Ao criar time, criar subscription com plano Free automaticamente
-- [ ] Garantir que todo time tenha uma subscription
+- [x] Ao criar time, criar subscription com plano Free automaticamente
+- [x] Garantir que todo time tenha uma subscription
 
 ### 6.2 Migration de Times Existentes
-- [ ] Script para atribuir plano Free aos times existentes
+- [x] Script no docker-entrypoint.sh para atribuir plano Free aos times existentes
 
 ---
 

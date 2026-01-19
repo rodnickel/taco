@@ -55,7 +55,20 @@ export class AuthService {
         },
       })
 
-      // Cria o time pessoal do usuário
+      // Buscar plano Free para atribuir ao novo time
+      const freePlan = await tx.plan.findUnique({
+        where: { slug: 'free' },
+      })
+
+      if (!freePlan) {
+        throw new AuthError(
+          'Plano Free não encontrado. Execute o seed dos planos.',
+          'PLAN_NOT_FOUND',
+          500
+        )
+      }
+
+      // Cria o time pessoal do usuário com subscription Free
       await tx.team.create({
         data: {
           name: data.name ? `Time de ${data.name}` : 'Meu Time',
@@ -65,6 +78,12 @@ export class AuthService {
             create: {
               userId: user.id,
               role: 'ADMIN',
+            },
+          },
+          subscription: {
+            create: {
+              planId: freePlan.id,
+              status: 'ACTIVE',
             },
           },
         },

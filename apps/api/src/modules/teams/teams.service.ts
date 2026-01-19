@@ -1,4 +1,5 @@
 import { prisma } from '../../lib/prisma.js'
+import { checkTeamMemberLimit } from '../plans/limits.service.js'
 import type {
   CreateTeamInput,
   UpdateTeamInput,
@@ -57,7 +58,16 @@ export async function createTeam(
     throw new Error('Slug já está em uso')
   }
 
-  // Criar time e adicionar criador como ADMIN
+  // Buscar plano Free para atribuir ao novo time
+  const freePlan = await prisma.plan.findUnique({
+    where: { slug: 'free' },
+  })
+
+  if (!freePlan) {
+    throw new Error('Plano Free não encontrado. Execute o seed dos planos.')
+  }
+
+  // Criar time, adicionar criador como ADMIN e atribuir plano Free
   const team = await prisma.team.create({
     data: {
       name: data.name,
@@ -67,6 +77,12 @@ export async function createTeam(
         create: {
           userId,
           role: 'ADMIN',
+        },
+      },
+      subscription: {
+        create: {
+          planId: freePlan.id,
+          status: 'ACTIVE',
         },
       },
     },
@@ -363,6 +379,12 @@ export async function createInvite(
     return null
   }
 
+  // Verificar limite de membros do plano
+  const limitCheck = await checkTeamMemberLimit(teamId)
+  if (!limitCheck.allowed) {
+    throw new Error(limitCheck.message || 'Limite de membros atingido')
+  }
+
   // Se email fornecido, verificar se já existe convite pendente para este email
   if (data.email) {
     const existingInvite = await prisma.teamInvite.findFirst({
@@ -557,6 +579,12 @@ export async function acceptInvite(
   // Verificar se atingiu limite de usos
   if (invite.maxUses > 0 && invite.useCount >= invite.maxUses) {
     throw new Error('Convite já foi utilizado')
+  }
+
+  // Verificar limite de membros do plano
+  const limitCheck = await checkTeamMemberLimit(invite.teamId)
+  if (!limitCheck.allowed) {
+    throw new Error(limitCheck.message || 'Limite de membros do time atingido')
   }
 
   // Verificar se é convite por email e o email confere

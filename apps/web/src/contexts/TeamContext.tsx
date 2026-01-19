@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 import * as api from '@/lib/api'
-import type { Team, TeamRole } from '@/lib/api'
+import type { Team, TeamRole, TeamUsage } from '@/lib/api'
 
 // ============================================
 // Context de Times
@@ -12,10 +12,12 @@ interface TeamContextValue {
   currentTeam: Team | null
   teams: Team[]
   userRole: TeamRole | null
+  usage: TeamUsage | null
   loading: boolean
   error: string | null
   switchTeam: (teamId: string) => void
   refreshTeams: () => Promise<void>
+  refreshUsage: () => Promise<void>
 }
 
 const TeamContext = createContext<TeamContextValue | undefined>(undefined)
@@ -28,8 +30,20 @@ export function TeamProvider({ children }: TeamProviderProps) {
   const [teams, setTeams] = useState<Team[]>([])
   const [currentTeam, setCurrentTeam] = useState<Team | null>(null)
   const [userRole, setUserRole] = useState<TeamRole | null>(null)
+  const [usage, setUsage] = useState<TeamUsage | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Carrega o uso/limites do time atual
+  const loadUsage = useCallback(async (teamId: string) => {
+    try {
+      const usageData = await api.getTeamUsage(teamId)
+      setUsage(usageData)
+    } catch (err) {
+      console.error('Erro ao carregar uso do time:', err)
+      // Não bloqueia se falhar - é informação secundária
+    }
+  }, [])
 
   // Carrega os times do usuário
   const loadTeams = useCallback(async () => {
@@ -42,6 +56,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
       if (teamsData.length === 0) {
         setCurrentTeam(null)
         setUserRole(null)
+        setUsage(null)
         api.setCurrentTeamId('')
         return
       }
@@ -59,6 +74,9 @@ export function TeamProvider({ children }: TeamProviderProps) {
 
       setCurrentTeam(teamToSelect)
       api.setCurrentTeamId(teamToSelect.id)
+
+      // Carrega uso/limites do time
+      loadUsage(teamToSelect.id)
 
       // Encontra o role do usuário no time
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
@@ -79,7 +97,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [loadUsage])
 
   // Carrega times quando o componente monta
   useEffect(() => {
@@ -99,6 +117,9 @@ export function TeamProvider({ children }: TeamProviderProps) {
       setCurrentTeam(team)
       api.setCurrentTeamId(team.id)
 
+      // Carrega uso/limites do novo time
+      loadUsage(team.id)
+
       // Atualiza o role
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
       if (token) {
@@ -112,7 +133,7 @@ export function TeamProvider({ children }: TeamProviderProps) {
         }
       }
     }
-  }, [teams])
+  }, [teams, loadUsage])
 
   // Recarrega a lista de times
   const refreshTeams = useCallback(async () => {
@@ -120,16 +141,25 @@ export function TeamProvider({ children }: TeamProviderProps) {
     await loadTeams()
   }, [loadTeams])
 
+  // Recarrega o uso/limites do time atual
+  const refreshUsage = useCallback(async () => {
+    if (currentTeam) {
+      await loadUsage(currentTeam.id)
+    }
+  }, [currentTeam, loadUsage])
+
   return (
     <TeamContext.Provider
       value={{
         currentTeam,
         teams,
         userRole,
+        usage,
         loading,
         error,
         switchTeam,
         refreshTeams,
+        refreshUsage,
       }}
     >
       {children}
