@@ -9,8 +9,8 @@ const envSchema = z.object({
   // Redis
   REDIS_URL: z.string().url(),
 
-  // JWT
-  JWT_SECRET: z.string().min(32),
+  // JWT (opcional para o worker, obrigatório para a API)
+  JWT_SECRET: z.string().min(32).optional(),
   JWT_EXPIRES_IN: z.string().default('7d'),
 
   // Email (Resend)

@@ -55,6 +55,11 @@ async function registerPlugins() {
     credentials: true,
   })
 
+  // Valida que JWT_SECRET existe (obrigatório para a API)
+  if (!env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is required for API server')
+  }
+
   // JWT - autenticação
   await app.register(jwt, {
     secret: env.JWT_SECRET,
