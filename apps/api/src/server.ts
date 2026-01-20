@@ -15,6 +15,7 @@ import { incidentsRoutes } from './modules/incidents/incidents.routes.js'
 import { groupsRoutes } from './modules/groups/groups.routes.js'
 import { maintenanceRoutes } from './modules/maintenance/maintenance.routes.js'
 import { plansRoutes, subscriptionRoutes } from './modules/plans/plans.routes.js'
+import { webhooksRoutes } from './modules/webhooks/webhooks.routes.js'
 
 // Cria a instância do Fastify com logger habilitado
 const app = Fastify({
@@ -121,6 +122,9 @@ async function registerRoutes() {
 
   // Rotas de assinatura do time: /teams/:teamId/subscription e /teams/:teamId/usage
   await app.register(subscriptionRoutes, { prefix: '/teams' })
+
+  // Rotas de webhooks (públicas): /webhooks/*
+  await app.register(webhooksRoutes, { prefix: '/webhooks' })
 }
 
 // Rota de health check

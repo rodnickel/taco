@@ -357,11 +357,17 @@ monitorCheckWorker.on('failed', (job, err) => {
 
 // Função para agendar verificações de todos os monitores ativos
 export async function scheduleAllMonitorChecks() {
+  // Busca apenas monitores ativos do tipo HTTP (exclui webhooks)
   const monitors = await prisma.monitor.findMany({
-    where: { active: true },
+    where: {
+      active: true,
+      type: {
+        not: 'webhook', // Monitores webhook não são checados ativamente
+      },
+    },
   })
 
-  console.log(`📋 Agendando verificações para ${monitors.length} monitores...`)
+  console.log(`📋 Agendando verificações para ${monitors.length} monitores HTTP...`)
 
   for (const monitor of monitors) {
     // Agenda verificação recorrente

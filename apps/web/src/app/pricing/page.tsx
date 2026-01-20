@@ -1,11 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getTeamSubscription } from '@/lib/api'
 
 const plans = [
   {
     name: 'Free',
+    slug: 'free',
     price: 'R$ 0',
     period: '/para sempre',
     description: 'Para projetos pessoais e testes',
@@ -27,6 +29,7 @@ const plans = [
   },
   {
     name: 'Starter',
+    slug: 'starter',
     price: 'R$ 29',
     period: '/mes',
     description: 'Para freelancers e pequenos projetos',
@@ -48,6 +51,7 @@ const plans = [
   },
   {
     name: 'Pro',
+    slug: 'pro',
     price: 'R$ 79',
     period: '/mes',
     description: 'Para startups e pequenas empresas',
@@ -69,6 +73,7 @@ const plans = [
   },
   {
     name: 'Business',
+    slug: 'business',
     price: 'R$ 199',
     period: '/mes',
     description: 'Para empresas em crescimento',
@@ -116,6 +121,27 @@ const faqs = [
 export default function PricingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [currentPlanSlug, setCurrentPlanSlug] = useState<string | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  // Verifica se está logado e busca plano atual
+  useEffect(() => {
+    async function checkAuth() {
+      const token = localStorage.getItem('token')
+      const currentTeamId = localStorage.getItem('currentTeam')
+
+      if (token && currentTeamId) {
+        setIsLoggedIn(true)
+        try {
+          const subscription = await getTeamSubscription(currentTeamId)
+          setCurrentPlanSlug(subscription.plan.slug)
+        } catch (error) {
+          console.error('Erro ao buscar assinatura:', error)
+        }
+      }
+    }
+    checkAuth()
+  }, [])
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -141,18 +167,29 @@ export default function PricingPage() {
 
             {/* Auth Buttons */}
             <div className="hidden md:flex items-center gap-4">
-              <Link
-                href="/login"
-                className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
-              >
-                Entrar
-              </Link>
-              <Link
-                href="/register"
-                className="text-sm font-medium bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                Criar Conta
-              </Link>
+              {isLoggedIn ? (
+                <Link
+                  href="/dashboard"
+                  className="text-sm font-medium bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+                  >
+                    Entrar
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="text-sm font-medium bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    Criar Conta
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -178,15 +215,26 @@ export default function PricingPage() {
               <Link href="/#recursos" className="block text-sm text-zinc-400 hover:text-white">Recursos</Link>
               <Link href="/pricing" className="block text-sm text-white font-medium">Precos</Link>
               <div className="pt-4 border-t border-zinc-800 flex flex-col gap-3">
-                <Link href="/login" className="text-sm font-medium text-zinc-300 hover:text-white">
-                  Entrar
-                </Link>
-                <Link
-                  href="/register"
-                  className="text-sm font-medium bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-center"
-                >
-                  Criar Conta
-                </Link>
+                {isLoggedIn ? (
+                  <Link
+                    href="/dashboard"
+                    className="text-sm font-medium bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-center"
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/login" className="text-sm font-medium text-zinc-300 hover:text-white">
+                      Entrar
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="text-sm font-medium bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-center"
+                    >
+                      Criar Conta
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -209,22 +257,31 @@ export default function PricingPage() {
       <section className="pb-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {plans.map((plan) => (
-              <div
-                key={plan.name}
-                className={`relative bg-zinc-900 border rounded-2xl p-6 flex flex-col ${
-                  plan.popular
-                    ? 'border-orange-500 ring-2 ring-orange-500/20'
-                    : 'border-zinc-800'
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                      Mais popular
-                    </span>
-                  </div>
-                )}
+            {plans.map((plan) => {
+              const isCurrentPlan = isLoggedIn && currentPlanSlug === plan.slug
+              return (
+                <div
+                  key={plan.name}
+                  className={`relative bg-zinc-900 border rounded-2xl p-6 flex flex-col transition-opacity ${
+                    plan.popular
+                      ? 'border-orange-500 ring-2 ring-orange-500/20'
+                      : 'border-zinc-800'
+                  } ${isCurrentPlan ? 'opacity-60' : ''}`}
+                >
+                  {isCurrentPlan && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                        Plano Atual
+                      </span>
+                    </div>
+                  )}
+                  {plan.popular && !isCurrentPlan && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className="bg-orange-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                        Mais popular
+                      </span>
+                    </div>
+                  )}
 
                 <div className="mb-6">
                   <h3 className="text-xl font-semibold text-white mb-2">{plan.name}</h3>
@@ -254,18 +311,28 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <Link
-                  href={plan.ctaLink}
-                  className={`w-full py-3 px-4 rounded-lg font-medium text-center transition-colors ${
-                    plan.popular
-                      ? 'bg-orange-600 hover:bg-orange-500 text-white'
-                      : 'bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700'
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                {isCurrentPlan ? (
+                  <button
+                    disabled
+                    className="w-full py-3 px-4 rounded-lg font-medium text-center bg-zinc-800 text-zinc-500 border border-zinc-700 cursor-not-allowed"
+                  >
+                    Plano Atual
+                  </button>
+                ) : (
+                  <Link
+                    href={isLoggedIn ? `/dashboard?upgrade=${plan.slug}` : plan.ctaLink}
+                    className={`w-full py-3 px-4 rounded-lg font-medium text-center transition-colors ${
+                      plan.popular
+                        ? 'bg-orange-600 hover:bg-orange-500 text-white'
+                        : 'bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700'
+                    }`}
+                  >
+                    {isLoggedIn ? 'Fazer Upgrade' : plan.cta}
+                  </Link>
+                )}
               </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </section>

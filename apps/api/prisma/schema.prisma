@@ -225,6 +225,7 @@ model MonitorGroup {
 model Monitor {
   id              String   @id @default(cuid())
   name            String
+  type            String   @default("http") // "http" | "webhook"
   url             String
   method          String   @default("GET")
   intervalSeconds Int      @default(300) @map("interval_seconds") // 5 minutos padrão
@@ -242,6 +243,12 @@ model Monitor {
   followRedirects    Boolean @default(true) @map("follow_redirects") // Seguir redirecionamentos HTTP
   requestBody        String? @map("request_body") // Body para POST/PUT/PATCH
   requestHeaders     Json?   @map("request_headers") // Headers customizados como JSON
+
+  // Configurações específicas para tipo WEBHOOK
+  webhookToken       String? @unique @map("webhook_token") // Token único para validar webhooks
+  webhookSecret      String? @map("webhook_secret") // Secret para validar assinatura HMAC
+  heartbeatInterval  Int?    @default(300) @map("heartbeat_interval") // Segundos entre heartbeats esperados (NULL = não usa heartbeat)
+  lastHeartbeat      DateTime? @map("last_heartbeat") // Último heartbeat recebido
 
   // Campos de status atual (atualizados pelo worker)
   currentStatus    String?   @map("current_status") // "up" | "down" | "degraded"
@@ -272,6 +279,8 @@ model Monitor {
   @@index([groupId])
   @@index([escalationPolicyId])
   @@index([active])
+  @@index([type])
+  @@index([webhookToken])
   @@map("monitors")
 }
 

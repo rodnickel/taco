@@ -397,6 +397,26 @@ async function prepareMonitorData(
 }
 
 export async function getPublicStatusPage(slug: string): Promise<PublicStatusPage | null> {
+  // First, fetch the status page to get historyDays
+  const statusPageBasic = await prisma.statusPage.findFirst({
+    where: {
+      slug,
+      isPublic: true,
+    },
+    select: {
+      id: true,
+      historyDays: true,
+    },
+  })
+
+  if (!statusPageBasic) {
+    return null
+  }
+
+  // Calculate the date range for checks based on historyDays
+  const historyStartDate = new Date(Date.now() - statusPageBasic.historyDays * 24 * 60 * 60 * 1000)
+
+  // Now fetch the full status page with checks filtered by date
   const statusPage = await prisma.statusPage.findFirst({
     where: {
       slug,
@@ -418,8 +438,12 @@ export async function getPublicStatusPage(slug: string): Promise<PublicStatusPag
               lastCheck: true,
               lastLatency: true,
               checks: {
+                where: {
+                  checkedAt: {
+                    gte: historyStartDate,
+                  },
+                },
                 orderBy: { checkedAt: 'desc' },
-                take: 100,
               },
             },
           },
@@ -436,8 +460,12 @@ export async function getPublicStatusPage(slug: string): Promise<PublicStatusPag
                 },
                 include: {
                   checks: {
+                    where: {
+                      checkedAt: {
+                        gte: historyStartDate,
+                      },
+                    },
                     orderBy: { checkedAt: 'desc' },
-                    take: 100,
                   },
                 },
               },

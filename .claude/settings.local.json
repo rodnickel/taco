@@ -107,7 +107,9 @@
       "Bash(npm run db:push:*)",
       "Bash(docker ps:*)",
       "Bash(docker exec:*)",
-      "Bash(docker cp:*)"
+      "Bash(docker cp:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker logs:*)"
     ]
   }
 }

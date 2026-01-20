@@ -13,6 +13,10 @@ import {
   sslCheckWorker,
   startSSLCheckProcessor,
 } from './workers/ssl-check.worker.js'
+import {
+  webhookHeartbeatWorker,
+  startWebhookHeartbeatChecker,
+} from './workers/webhook-heartbeat.worker.js'
 
 // ============================================
 // Script para executar o Worker de forma independente
@@ -44,6 +48,9 @@ async function start() {
     // Inicia verificador de SSL
     await startSSLCheckProcessor()
 
+    // Inicia verificador de heartbeat webhook
+    await startWebhookHeartbeatChecker()
+
     console.log('✅ Workers rodando e aguardando jobs...')
   } catch (err) {
     console.error('❌ Erro ao iniciar worker:', err)
@@ -58,6 +65,7 @@ async function shutdown() {
   await monitorCheckWorker.close()
   await escalationWorker.close()
   await sslCheckWorker.close()
+  await webhookHeartbeatWorker.close()
   await prisma.$disconnect()
   await redis.quit()
 
