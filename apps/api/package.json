@@ -23,6 +23,7 @@
     "@prisma/client": "^6.1.0",
     "bcrypt": "^5.1.1",
     "bullmq": "^5.66.1",
+    "cacheable-lookup": "^7.0.0",
     "dotenv": "^17.2.3",
     "fastify": "^5.2.0",
     "ioredis": "^5.8.2",

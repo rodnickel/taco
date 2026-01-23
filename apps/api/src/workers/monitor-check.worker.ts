@@ -10,12 +10,43 @@ import {
   shouldSuppressIncidents,
   getActiveMaintenanceForMonitor,
 } from '../modules/maintenance/maintenance.service.js'
+import CacheableLookup from 'cacheable-lookup'
+import https from 'node:https'
+import http from 'node:http'
 
 // ============================================
 // Worker de Verificação de Monitors
 // ============================================
 
 const QUEUE_NAME = 'monitor-checks'
+
+// ============================================
+// Otimizações de Performance
+// ============================================
+
+// DNS Cache (reduz DNS lookup de ~100ms para ~1ms)
+const dnsCache = new CacheableLookup()
+
+// HTTP/HTTPS Agents com keep-alive (reutiliza conexões TCP)
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000, // 30s
+  maxSockets: 50,
+  maxFreeSockets: 10,
+  timeout: 30000,
+})
+
+const httpAgent = new http.Agent({
+  keepAlive: true,
+  keepAliveMsecs: 30000,
+  maxSockets: 50,
+  maxFreeSockets: 10,
+  timeout: 30000,
+})
+
+// Instala o DNS cache nos agents
+dnsCache.install(httpsAgent)
+dnsCache.install(httpAgent)
 
 // Fila para agendar verificações
 export const monitorCheckQueue = new Queue(QUEUE_NAME, {
@@ -91,6 +122,8 @@ async function performCheck(options: PerformCheckOptions): Promise<CheckResult> 
       signal: controller.signal,
       headers,
       redirect: followRedirects ? 'follow' : 'manual',
+      // @ts-ignore - Node.js fetch aceita agent
+      agent: url.startsWith('https') ? httpsAgent : httpAgent,
     }
 
     // Adiciona body para métodos que suportam
