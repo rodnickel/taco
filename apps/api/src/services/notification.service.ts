@@ -71,7 +71,7 @@ export async function sendEmailNotification(
             ` : ''}
             <tr>
               <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Verificado em</td>
-              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${payload.checkedAt.toLocaleString('pt-BR')}</td>
+              <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">${payload.checkedAt.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</td>
             </tr>
             ${payload.message ? `
             <tr>
@@ -219,7 +219,7 @@ export async function sendWhatsAppNotification(
 *Status:* ${statusText}${payload.latency ? `
 *Latência:* ${payload.latency}ms` : ''}${payload.message ? `
 *Mensagem:* ${payload.message}` : ''}
-*Verificado em:* ${payload.checkedAt.toLocaleString('pt-BR')}
+*Verificado em:* ${payload.checkedAt.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
 
 _Enviado por Taco Monitoring_`
 
@@ -278,7 +278,7 @@ export async function sendTelegramNotification(
 *Status:* ${statusText}${payload.latency ? `
 *Latência:* ${payload.latency}ms` : ''}${payload.message ? `
 *Mensagem:* ${escapeMarkdown(payload.message)}` : ''}
-*Verificado em:* ${payload.checkedAt.toLocaleString('pt-BR')}
+*Verificado em:* ${payload.checkedAt.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
 
 _Enviado por Taco Monitoring_`
 
